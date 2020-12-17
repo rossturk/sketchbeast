@@ -181,10 +181,10 @@
 				cp.setAttribute("id", "clip");
 				cp.setAttribute("clipPathUnits", "objectBoundingBox");
 				
-				let rect = svgRect(cfg.width, cfg.height);
+				let rect = svgRect(cfg.naturalWidth, cfg.naturalHeight);
 				cp.appendChild(rect);
 
-				rect = svgRect(cfg.width, cfg.height);
+				rect = svgRect(cfg.naturalWidth, cfg.naturalHeight);
 				rect.setAttribute("fill", cfg.fill);
 				node.appendChild(rect);
 
@@ -204,16 +204,12 @@
 				img.crossOrigin = true;
 				img.src = url;
 				img.onload = e => {
-					let w = img.naturalWidth;
-					let h = img.naturalHeight;
+					cfg.naturalWidth = img.naturalWidth;
+					cfg.naturalHeight = img.naturalHeight;
 
-					let computeScale = getScale(w, h, cfg.computeSize);
-					cfg.width = w / computeScale;
-					cfg.height = h / computeScale;
-
-					let viewScale = getScale(w, h, cfg.viewSize);
-
-					cfg.scale = computeScale / viewScale;
+					cfg.computeScale = getScale(cfg.naturalWidth, cfg.naturalHeight, cfg.computeSize);
+					cfg.width = cfg.naturalWidth / cfg.computeScale;
+					cfg.height = cfg.naturalHeight / cfg.computeScale;
 
 					let canvas = this.empty(cfg);
 					canvas.ctx.drawImage(img, 0, 0, cfg.width, cfg.height);
@@ -740,21 +736,38 @@
 			return Canvas.original(url, this.cfg);
 		}
 
-		async begin(original) {
+		begin(original) {
 			this.cfg.nodes.status.innerHTML = "";
 			this.cfg.nodes.output.innerHTML = "";
-			this.cfg.nodes.vectorText.value = "";
+			this.cfg.nodes.svgsrc.value = "";
 
 			let optimizer = new Optimizer(original, this.cfg);
 			let steps = 0;
 
-			let cfg2 = Object.assign({}, this.cfg, {width:this.cfg.scale*this.cfg.width, height:this.cfg.scale*this.cfg.height});
+			let cfg2 = Object.assign({}, this.cfg, {width:this.cfg.naturalWidth, height:this.cfg.naturalHeight});
 			let result = Canvas.empty(cfg2, false);
 			result.ctx.scale(this.cfg.scale, this.cfg.scale);
 
+			let viewWidth = this.cfg.naturalWidth * this.cfg.viewHeight / this.cfg.naturalHeight;
+
+			let w,h;
+
+			if (this.cfg.naturalWidth > this.cfg.naturalHeight) {
+				// landscape
+				w = this.cfg.viewWidth;
+				h = this.cfg.naturalHeight * this.cfg.viewWidth / this.cfg.naturalWidth;
+			} else {
+				// portrait
+				h = this.cfg.viewHeight;
+				w = this.cfg.naturalWidth * this.cfg.viewHeight / this.cfg.naturalHeight;
+			}
+
+			console.log(w);
+			console.log(h);
+			
 			let svg = Canvas.empty(this.cfg, true);
-			svg.setAttribute("width", cfg2.width);
-			svg.setAttribute("height", cfg2.height);
+			svg.setAttribute("width", w);
+			svg.setAttribute("height", h);
 			this.cfg.nodes.output.appendChild(svg);
 
 			let serializer = new XMLSerializer();
@@ -764,12 +777,13 @@
 					result.drawStep(step);
 					svg.appendChild(step.toSVG());
 					let percent = (100*(1-step.distance)).toFixed(2);
-					this.cfg.nodes.vectorText.value = serializer.serializeToString(svg);
+					this.cfg.nodes.svgsrc.value = serializer.serializeToString(svg);
 					this.cfg.nodes.status.innerHTML = `(${++steps} of ${this.cfg.steps}, ${percent}% similar)`;
+					const event = new Event('shape');
+					this.cfg.nodes.output.dispatchEvent(event);
 				}
 			};
-			await optimizer.start();
-			console.log("foo");
+			optimizer.start();
 		}
 
 	}

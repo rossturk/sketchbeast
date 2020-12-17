@@ -34,15 +34,11 @@
                   <span class="clause">of
                     <input type="number" id="count" min="3" max="150" value="15"> semi-random
                     <select name="mode" id="mode">
-                      <option value="0">mixed shapes</option>
-                      <option value="5">rotated rectangles</option>
-                      <option value="8">polygons</option>
-                      <option value="1">triangles</option>
-                      <option value="2">rectangles</option>
+                      <option value="4">mixed shapes</option>
+                      <option value="4">polygons</option>
+                      <option value="2">triangles</option>
+                      <option value="1">rectangles</option>
                       <option value="3">ellipses</option>
-                      <option value="4">circles</option>
-                      <option value="6">curved lines</option>
-                      <option value="7">rotated ellipses</option>
                     </select>
                   </span>
                   <span class="beforetext clause">when you press <input type="button" value="this button" id="process" /></span>
@@ -89,8 +85,6 @@
       var blob = new Blob([svgsrc], {type: 'image/svg+xml'});
       var url = URL.createObjectURL(blob);
 
-      console.log(svgsrc);
-
       var thumbnail = document.createElement('img');
       thumbnail.src = url;
       thumbnail.id = makeid(5);
@@ -108,6 +102,13 @@
       gallery.prepend(downloadspan);
       gallery.prepend(thumbnail);
 
+      var image = document.createElement('img');
+      image.src = url;
+
+      var output = document.getElementById("output");
+      output.innerHTML = "";
+      output.append(image);
+
       updateImageSize();
       stopProcessing();
     }
@@ -118,17 +119,23 @@
       var targetnodes = {
         output: document.querySelector("#output"),
         status: document.querySelector("#status"),
-        vectorText: document.querySelector("#svgsrc")
+        svgsrc: document.querySelector("#svgsrc")
       }
+
+      var steps = document.getElementById('count').value;
+      var mode = document.getElementById('mode').value;
+      var blur = document.getElementById('blur').value;
 
       var config = {
         computeSize: 100,
-        viewSize: 500,
-        steps: 20,
+        viewHeight: $("#workpane").height(),
+        viewWidth: ($("#workpane").width() / 2) - 40,
+        steps: parseInt(steps),
+        mode: parseInt(mode),
+        blur: parseInt(blur),
         shapes: 200,
         alpha: 0.5,
         mutations: 30,
-        mode: 4,
         mutateAlpha: false,
         fill: 'auto',
         nodes: targetnodes
@@ -233,6 +240,10 @@
       addThumbnail();
     }, false);
 
+    document.getElementById('output').addEventListener('shape', function () {
+      updateImageSize();
+    }, false);
+
     function startProcessing() {
       $(".beforetext").hide();
       $(".duringtext").show();
@@ -246,6 +257,7 @@
     function updateImageSize() {
       var height = $("#workpane").height();
       $("#output").find("img").css("max-height", height);
+      $("#output").find("svg").css("max-height", height);
       $("#input").find("img").css("max-height", height);
     }
 

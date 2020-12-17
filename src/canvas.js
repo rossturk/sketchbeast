@@ -55,10 +55,10 @@ export default class Canvas {
 			cp.setAttribute("id", "clip");
 			cp.setAttribute("clipPathUnits", "objectBoundingBox");
 			
-			let rect = svgRect(cfg.width, cfg.height);
+			let rect = svgRect(cfg.naturalWidth, cfg.naturalHeight);
 			cp.appendChild(rect);
 
-			rect = svgRect(cfg.width, cfg.height);
+			rect = svgRect(cfg.naturalWidth, cfg.naturalHeight);
 			rect.setAttribute("fill", cfg.fill);
 			node.appendChild(rect);
 
@@ -78,16 +78,12 @@ export default class Canvas {
 			img.crossOrigin = true;
 			img.src = url;
 			img.onload = e => {
-				let w = img.naturalWidth;
-				let h = img.naturalHeight;
+				cfg.naturalWidth = img.naturalWidth;
+				cfg.naturalHeight = img.naturalHeight;
 
-				let computeScale = getScale(w, h, cfg.computeSize);
-				cfg.width = w / computeScale;
-				cfg.height = h / computeScale;
-
-				let viewScale = getScale(w, h, cfg.viewSize);
-
-				cfg.scale = computeScale / viewScale;
+				cfg.computeScale = getScale(cfg.naturalWidth, cfg.naturalHeight, cfg.computeSize);
+				cfg.width = cfg.naturalWidth / cfg.computeScale;
+				cfg.height = cfg.naturalHeight / cfg.computeScale;
 
 				let canvas = this.empty(cfg);
 				canvas.ctx.drawImage(img, 0, 0, cfg.width, cfg.height);
