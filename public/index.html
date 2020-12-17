@@ -1,0 +1,280 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <title>sketchbeast</title>
+      <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+      <script src="https://cdn.jsdelivr.net/npm/exif-js"></script>
+      <script src="js/ImageTools.js"></script>
+      <script src="js/beast.js"></script>
+      <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/css/bootstrap.min.css" integrity="sha384-TX8t27EcRE3e/ihU7zmQxVncDAy5uIKz4rEkgIXeMed4M0jlfIDPvg6uqKI2xXr2" crossorigin="anonymous">
+      <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-ho+j7jyWK8fNQe+A12Hb8AhRq26LrZ/JpcUGGOn+Y7RsweNrtN/tE3MoK7ZeZDyx" crossorigin="anonymous"></script>
+      <link rel="stylesheet" href="css/sketchbeast.css">
+  </head>
+  <body>
+    <div class="container-fluid h-100" style="background-color: #1c1c1c;">
+      <div class="h-100 d-flex flex-column">
+        <div class="row d-block" id="settings">
+          <div class="col">
+            <form id="mainform" method="post" enctype="multipart/form-data">
+              <input type="file" id="fileinput" name="image" accept="image/*" />
+              <input type="hidden" id="status" />
+              <input type="hidden" id="svgsrc" />
+              <p><span class="clause">sketchbeast
+                <span class="beforetext">will use</span>
+                <span class="duringtext">is using</span>
+                <label for="fileinput" class="button" id="fileupload">your uploaded file</label></span>
+                <span class="clause">to make a
+                  <select name="blur" id="blur">
+                    <option value="0">crystal clear</option>
+                    <option value="2">hazy</option>
+                    <option value="15">blurry</option>
+                    <option value="50">fuzzy</option>
+                  </select> collage</span><br />
+                  <span class="clause">of
+                    <input type="number" id="count" min="3" max="150" value="15"> semi-random
+                    <select name="mode" id="mode">
+                      <option value="0">mixed shapes</option>
+                      <option value="5">rotated rectangles</option>
+                      <option value="8">polygons</option>
+                      <option value="1">triangles</option>
+                      <option value="2">rectangles</option>
+                      <option value="3">ellipses</option>
+                      <option value="4">circles</option>
+                      <option value="6">curved lines</option>
+                      <option value="7">rotated ellipses</option>
+                    </select>
+                  </span>
+                  <span class="beforetext clause">when you press <input type="button" value="this button" id="process" /></span>
+                <span class="spinner-grow bluu duringtext" role="status"><span class="sr-only"></span></span>
+              </p>
+            </form>
+        </div>
+        </div>
+
+        <div id="workpane" class="row flex-grow-1 align-items-center justify-items-center overflow-auto">
+          <div class="col-6" id="input"><img src="images/before.jpg" /></div>
+          <div class="col-6" id="output"><img src="images/after.svg" /></div>
+        </div>
+
+        <div class="row flex-nowrap" id="thumbnails"></div>
+      </div>
+    </div> 
+
+    <script>
+
+(function(){
+    function previewImage(file) {
+        var input = document.getElementById("input");
+        var imageType = /image.*/;
+
+        if (!file.type.match(imageType)) {
+            throw "File Type must be an image";
+        }
+
+        var img = document.createElement("img");
+        img.file = file;
+        input.innerHTML = "";
+        input.append(img);
+
+        var reader = new FileReader();
+        reader.onload = (function(aImg) { return function(e) { aImg.src = e.target.result; }; })(img);
+        reader.readAsDataURL(file);
+        updateImageSize();
+
+    }
+
+    function addThumbnail() {
+      var svgsrc = document.getElementById("svgsrc").value;
+      var blob = new Blob([svgsrc], {type: 'image/svg+xml'});
+      var url = URL.createObjectURL(blob);
+
+      console.log(svgsrc);
+
+      var thumbnail = document.createElement('img');
+      thumbnail.src = url;
+      thumbnail.id = makeid(5);
+      thumbnail.className = "thumbnail";
+
+      var downloadbutton = document.createElement('button');
+      downloadbutton.classList.add("btn");
+      downloadbutton.innerHTML = '<svg width="15" height="15" viewBox="0 0 16 16" class="bi bi-download" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5z"></path><path fill-rule="evenodd" d="M7.646 11.854a.5.5 0 0 0 .708 0l3-3a.5.5 0 0 0-.708-.708L8.5 10.293V1.5a.5.5 0 0 0-1 0v8.793L5.354 8.146a.5.5 0 1 0-.708.708l3 3z"></path></svg>';
+      
+      var downloadspan = document.createElement('div');
+      downloadspan.className = "download";
+      downloadspan.appendChild(downloadbutton);
+
+      var gallery = document.getElementById("thumbnails");
+      gallery.prepend(downloadspan);
+      gallery.prepend(thumbnail);
+
+      updateImageSize();
+      stopProcessing();
+    }
+
+    function process(file){
+      url = URL.createObjectURL(file);
+
+      var targetnodes = {
+        output: document.querySelector("#output"),
+        status: document.querySelector("#status"),
+        vectorText: document.querySelector("#svgsrc")
+      }
+
+      var config = {
+        computeSize: 100,
+        viewSize: 500,
+        steps: 20,
+        shapes: 200,
+        alpha: 0.5,
+        mutations: 30,
+        mode: 4,
+        mutateAlpha: false,
+        fill: 'auto',
+        nodes: targetnodes
+      }
+
+      var beast = new Beast(config);
+      beast.load(url).then(original => beast.begin(original));
+      startProcessing();
+    }
+
+    function downloadURL(url, name = 'file.txt') {
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = name;
+
+      document.body.appendChild(link);
+
+      link.dispatchEvent(
+        new MouseEvent('click', { 
+          bubbles: true, 
+          cancelable: true, 
+          view: window 
+        })
+      );
+
+      document.body.removeChild(link);
+    }
+
+    function makeid(length) {
+      var result = '';
+      var characters = 'abcdefghijklmnopqrstuvwxyz0123456789';
+      var charactersLength = characters.length;
+      for ( var i = 0; i < length; i++ ) {
+        result += characters.charAt(Math.floor(Math.random() * charactersLength));
+      }
+      return result;
+    }
+
+    document.querySelector('#fileinput').addEventListener('change', function () {
+        for(var i=0; i<this.files.length; i++){
+            previewImage(this.files[i]); 
+        }
+    }, false);
+
+    document.getElementById('process').addEventListener('click', function () {
+        var files = document.querySelector('#fileinput').files;
+        for(var i=0; i<files.length; i++){
+            process(files[i]);
+        }
+    }, false);
+
+    document.getElementById('count').addEventListener('change', function () {
+      if (this.value > 150) { this.value = 150; this.style.width = '113px'; }
+      if (this.value < 3) { this.value = 3; this.style.width = '96px'; }
+    }, false);
+
+    document.getElementById('count').addEventListener('input', function () {  
+      if (this.value.length == 0) { this.style.width = '51px'}  
+      if (this.value.length == 1) { this.style.width = '77px'}  
+      if (this.value.length == 2) { this.style.width = '96px'}  
+      if (this.value.length == 3) { this.style.width = '113px'}  
+      if (this.value.length > 3) { this.value = 150; this.style.width = '113px'}
+    }, false);
+
+
+    $(document).ready(function () {
+      updateImageSize();
+      stopProcessing();
+
+      $(window).keydown(function(event){
+        if(event.keyCode == 13) {
+          event.preventDefault();
+          return false;
+        }
+      });
+    });
+
+    $(window).resize(function() {
+      updateImageSize();
+    });
+
+    $('body').on('click', '.download', function (){
+      downloadURL($(this).prev().attr('src'), "beast-" + $(this).prev().attr('id') + ".svg");
+    });
+
+    $('body').on('click', '.thumbnail', function (){
+      var image = document.createElement('img');
+      image.src = this.src;
+
+      var height = $("#workpane").height();
+
+      var output = document.getElementById("output");
+      output.innerHTML = "";
+      output.append(image);
+
+      $("#output").find("img").css("max-height", height);
+    });
+
+    $("#output").change(function() { updateImageSize()});
+
+    document.getElementById('output').addEventListener('beast', function () {
+      addThumbnail();
+    }, false);
+
+    function startProcessing() {
+      $(".beforetext").hide();
+      $(".duringtext").show();
+    }
+
+    function stopProcessing() {
+      $(".beforetext").show();
+      $(".duringtext").hide();
+    }
+
+    function updateImageSize() {
+      var height = $("#workpane").height();
+      $("#output").find("img").css("max-height", height);
+      $("#input").find("img").css("max-height", height);
+    }
+
+    $('select').change(function(){
+      var text = $(this).find('option:selected').text();
+      var $aux = $('<select/>').append($('<option/>').text(text));
+      $(this).after($aux);
+      $(this).width($aux.width());
+      $aux.remove();
+    }).change();
+
+    $('body').on('mouseover', '.thumbnail, .download', function () {
+      if ($(this).attr('class') == "thumbnail") {
+        $(this).next().show();
+      } else {
+        $(this).show();
+      }
+    });
+
+    $('body').on('mouseleave', '.thumbnail, .download', function () {
+      if ($(this).attr('class') == "thumbnail") {
+        $(this).next().hide();
+      } else {
+        $(this).hide();
+      }
+    });
+
+})();
+
+    </script>
+  </body>
+</html>   
