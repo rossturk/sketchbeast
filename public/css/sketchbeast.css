@@ -118,3 +118,8 @@ input[type=number] {
 .download button:hover {
     color: #fff;
 }
+
+.duringtext {
+    display:none;
+}
+
