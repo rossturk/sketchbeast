@@ -62,6 +62,16 @@ export default class Canvas {
 			rect.setAttribute("fill", cfg.fill);
 			node.appendChild(rect);
 
+
+			['0.2', '0.6', '1'].forEach(function(item){
+				let fe = document.createElementNS(util.SVGNS, "feGaussianBlur");
+				fe.setAttribute("stdDeviation", item);
+				let filter = document.createElementNS(util.SVGNS, "filter");
+				filter.setAttribute("id", "g"+item);
+				filter.appendChild(fe);
+				node.appendChild(filter);
+			})
+
 			return node;
 		} else {
 			return new this(cfg.width, cfg.height).fill(cfg.fill);

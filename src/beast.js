@@ -12,6 +12,7 @@ class Beast {
 				this.cfg.shapeTypes.push(Triangle);
 				this.cfg.shapeTypes.push(Rectangle);
 				this.cfg.shapeTypes.push(Ellipse);
+				this.cfg.shapeTypes.push(RandomPolygon);
 				break;
 			case 1:
 				this.cfg.shapeTypes.push(Rectangle);
@@ -25,10 +26,6 @@ class Beast {
 			case 4:
 				this.cfg.shapeTypes.push(RandomPolygon);
 				break;
-			case 5:
-				this.cfg.shapeTypes.push(Triangle);
-				this.cfg.shapeTypes.push(Rectangle);
-				break;
 		}
 	}
 
@@ -37,7 +34,6 @@ class Beast {
 	}
 
 	begin(original) {
-		this.cfg.nodes.status.innerHTML = "";
 		this.cfg.nodes.output.innerHTML = "";
 		this.cfg.nodes.svgsrc.value = "";
 
@@ -61,9 +57,6 @@ class Beast {
 			h = this.cfg.viewHeight;
 			w = this.cfg.naturalWidth * this.cfg.viewHeight / this.cfg.naturalHeight;
 		}
-
-		console.log(w);
-		console.log(h);
 		
 		let svg = Canvas.empty(this.cfg, true);
 		svg.setAttribute("width", w);
@@ -76,10 +69,9 @@ class Beast {
 			if (step) {
 				result.drawStep(step);
 				svg.appendChild(step.toSVG());
-				let percent = (100*(1-step.distance)).toFixed(2);
 				this.cfg.nodes.svgsrc.value = serializer.serializeToString(svg);
-				this.cfg.nodes.status.innerHTML = `(${++steps} of ${this.cfg.steps}, ${percent}% similar)`;
-				const event = new Event('shape');
+				let stepsremaining = this.cfg.steps - ++steps;
+				const event = new CustomEvent('shape',{ detail: stepsremaining } );
 				this.cfg.nodes.output.dispatchEvent(event);
 			}
 		}

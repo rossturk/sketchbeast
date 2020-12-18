@@ -61,7 +61,7 @@ input[type="file"] {
     width: 96px;
 }
 
-select, input {
+select, input, #currentcount {
     appearance: none;
     -webkit-appearance: none;
     background-color: transparent;
@@ -73,7 +73,7 @@ select, input {
     cursor: pointer;
     line-height: inherit;
     outline: none;
-    color: #2a6d83;
+    color: #3991af;
 }       
 
 input::-webkit-outer-spin-button,

@@ -188,6 +188,16 @@
 				rect.setAttribute("fill", cfg.fill);
 				node.appendChild(rect);
 
+
+				['0.2', '0.6', '1'].forEach(function(item){
+					let fe = document.createElementNS(SVGNS, "feGaussianBlur");
+					fe.setAttribute("stdDeviation", item);
+					let filter = document.createElementNS(SVGNS, "filter");
+					filter.setAttribute("id", "g"+item);
+					filter.appendChild(fe);
+					node.appendChild(filter);
+				});
+
 				return node;
 			} else {
 				return new this(cfg.width, cfg.height).fill(cfg.fill);
@@ -378,10 +388,11 @@
 			let ctors = cfg.shapeTypes;
 			let index = Math.floor(Math.random() * ctors.length);
 			let ctor = ctors[index];
-			return new ctor(cfg.width, cfg.height);
+			return new ctor(cfg, cfg.width, cfg.height);
 		}
 
-		constructor(w, h) {
+		constructor(cfg, w, h) {
+			this.cfg = cfg;
 			this.bbox = {};
 		}
 
@@ -400,13 +411,48 @@
 			return canvas;
 		}
 
+		addBlur(element) {
+
+			switch (this.cfg.blur) {
+				case 0:
+					break;
+				case 1:
+					if (Math.floor(Math.random() * 2) == 1) {
+						switch (Math.floor(Math.random()*3)) {
+							case 0:
+								element.setAttribute("filter", "url(#g0.6)");
+								break;
+							case 1:
+								element.setAttribute("filter", "url(#g0.2)");
+								break;
+							case 2:
+								element.setAttribute("filter", "url(#g1)");
+								break;
+						}	
+					}
+					break;
+				case 2:
+					switch (Math.floor(Math.random()*3)) {
+						case 0:
+							element.setAttribute("filter", "url(#g0.6)");
+							break;
+						case 1:
+							element.setAttribute("filter", "url(#g0.2)");
+							break;
+						case 2:
+							element.setAttribute("filter", "url(#g1)");
+							break;
+					}	
+					break;
+			}
+		}
+
 		render(ctx) {}
 	}
 
 	class Polygon extends Shape {
-		constructor(w, h, count) {
-			super(w, h);
-
+		constructor(cfg, w, h, count) {
+			super(cfg, w, h);
 			this.points = this._createPoints(w, h, count);
 			this.computeBbox();
 		}
@@ -431,11 +477,12 @@
 				return `${cmd}${point.join(",")}`;
 			}).join("");
 			path.setAttribute("d", `${d}Z`);
+			this.addBlur(path);
 			return path;
 		}
 
 		mutate(cfg) {
-			let clone = new this.constructor(0, 0);
+			let clone = new this.constructor(cfg, 0, 0);
 			clone.points = this.points.map(point => point.slice());
 
 			let index = Math.floor(Math.random() * this.points.length);
@@ -474,7 +521,7 @@
 			let points = [first];
 
 			for (let i=1;i<count;i++) {
-				let angle = Math.random() * 2 * Math.PI;
+				let angle = Math.random() * 2 * Math.PI; // do something here based on count
 				let radius = Math.random() * 20;
 				points.push([
 					first[0] + ~~(radius * Math.cos(angle)),
@@ -486,20 +533,20 @@
 	}
 
 	class RandomPolygon extends Polygon {
-		constructor(w,h) {
-			super(w, h, Math.floor(Math.random()*4)+4);
+		constructor(cfg, w,h) {
+			super(cfg, w, h, Math.floor(Math.random()*4)+4);
 		}
 	}
 
 	class Triangle extends Polygon {
-		constructor(w, h) {
-			super(w, h, 3);
+		constructor(cfg, w, h) {
+			super(cfg, w, h, 3);
 		}
 	}
 
 	class Rectangle extends Polygon {
-		constructor(w, h) {
-			super(w, h, 4);
+		constructor(cfg, w, h) {
+			super(cfg, w, h, 4);
 		}
 
 		mutate(cfg) {
@@ -549,8 +596,8 @@
 	}
 
 	class Ellipse extends Shape {
-		constructor(w, h) {
-			super(w, h);
+		constructor(cfg, w, h) {
+			super(cfg, w, h);
 
 			this.center = Shape.randomPoint(w, h);
 			this.rx = 1 + ~~(Math.random() * 20);
@@ -571,6 +618,7 @@
 			node.setAttribute("cy", this.center[1]);
 			node.setAttribute("rx", this.rx);
 			node.setAttribute("ry", this.ry);
+			this.addBlur(node);
 			return node;
 		}
 
@@ -712,6 +760,7 @@
 					this.cfg.shapeTypes.push(Triangle);
 					this.cfg.shapeTypes.push(Rectangle);
 					this.cfg.shapeTypes.push(Ellipse);
+					this.cfg.shapeTypes.push(RandomPolygon);
 					break;
 				case 1:
 					this.cfg.shapeTypes.push(Rectangle);
@@ -725,10 +774,6 @@
 				case 4:
 					this.cfg.shapeTypes.push(RandomPolygon);
 					break;
-				case 5:
-					this.cfg.shapeTypes.push(Triangle);
-					this.cfg.shapeTypes.push(Rectangle);
-					break;
 			}
 		}
 
@@ -737,7 +782,6 @@
 		}
 
 		begin(original) {
-			this.cfg.nodes.status.innerHTML = "";
 			this.cfg.nodes.output.innerHTML = "";
 			this.cfg.nodes.svgsrc.value = "";
 
@@ -761,9 +805,6 @@
 				h = this.cfg.viewHeight;
 				w = this.cfg.naturalWidth * this.cfg.viewHeight / this.cfg.naturalHeight;
 			}
-
-			console.log(w);
-			console.log(h);
 			
 			let svg = Canvas.empty(this.cfg, true);
 			svg.setAttribute("width", w);
@@ -776,10 +817,9 @@
 				if (step) {
 					result.drawStep(step);
 					svg.appendChild(step.toSVG());
-					let percent = (100*(1-step.distance)).toFixed(2);
 					this.cfg.nodes.svgsrc.value = serializer.serializeToString(svg);
-					this.cfg.nodes.status.innerHTML = `(${++steps} of ${this.cfg.steps}, ${percent}% similar)`;
-					const event = new Event('shape');
+					let stepsremaining = this.cfg.steps - ++steps;
+					const event = new CustomEvent('shape',{ detail: stepsremaining } );
 					this.cfg.nodes.output.dispatchEvent(event);
 				}
 			};

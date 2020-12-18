@@ -11,10 +11,11 @@ export class Shape {
 		let ctors = cfg.shapeTypes;
 		let index = Math.floor(Math.random() * ctors.length);
 		let ctor = ctors[index];
-		return new ctor(cfg.width, cfg.height);
+		return new ctor(cfg, cfg.width, cfg.height);
 	}
 
-	constructor(w, h) {
+	constructor(cfg, w, h) {
+		this.cfg = cfg;
 		this.bbox = {};
 	}
 
@@ -33,13 +34,48 @@ export class Shape {
 		return canvas;
 	}
 
+	addBlur(element) {
+
+		switch (this.cfg.blur) {
+			case 0:
+				break;
+			case 1:
+				if (Math.floor(Math.random() * 2) == 1) {
+					switch (Math.floor(Math.random()*3)) {
+						case 0:
+							element.setAttribute("filter", "url(#g0.6)");
+							break;
+						case 1:
+							element.setAttribute("filter", "url(#g0.2)");
+							break;
+						case 2:
+							element.setAttribute("filter", "url(#g1)");
+							break;
+					}	
+				}
+				break;
+			case 2:
+				switch (Math.floor(Math.random()*3)) {
+					case 0:
+						element.setAttribute("filter", "url(#g0.6)");
+						break;
+					case 1:
+						element.setAttribute("filter", "url(#g0.2)");
+						break;
+					case 2:
+						element.setAttribute("filter", "url(#g1)");
+						break;
+				}	
+				break;
+		}
+	}
+
 	render(ctx) {}
 }
 
 class Polygon extends Shape {
-	constructor(w, h, count) {
-		super(w, h);
-
+	constructor(cfg, w, h, count) {
+		super(cfg, w, h);
 		this.points = this._createPoints(w, h, count);
 		this.computeBbox();
 	}
@@ -64,11 +100,12 @@ class Polygon extends Shape {
 			return `${cmd}${point.join(",")}`;
 		}).join("");
 		path.setAttribute("d", `${d}Z`);
+		this.addBlur(path);
 		return path;
 	}
 
 	mutate(cfg) {
-		let clone = new this.constructor(0, 0);
+		let clone = new this.constructor(cfg, 0, 0);
 		clone.points = this.points.map(point => point.slice());
 
 		let index = Math.floor(Math.random() * this.points.length);
@@ -107,7 +144,7 @@ class Polygon extends Shape {
 		let points = [first];
 
 		for (let i=1;i<count;i++) {
-			let angle = Math.random() * 2 * Math.PI;
+			let angle = Math.random() * 2 * Math.PI; // do something here based on count
 			let radius = Math.random() * 20;
 			points.push([
 				first[0] + ~~(radius * Math.cos(angle)),
@@ -119,20 +156,20 @@ class Polygon extends Shape {
 }
 
 export class RandomPolygon extends Polygon {
-	constructor(w,h) {
-		super(w, h, Math.floor(Math.random()*4)+4);
+	constructor(cfg, w,h) {
+		super(cfg, w, h, Math.floor(Math.random()*4)+4);
 	}
 }
 
 export class Triangle extends Polygon {
-	constructor(w, h) {
-		super(w, h, 3);
+	constructor(cfg, w, h) {
+		super(cfg, w, h, 3);
 	}
 }
 
 export class Rectangle extends Polygon {
-	constructor(w, h) {
-		super(w, h, 4);
+	constructor(cfg, w, h) {
+		super(cfg, w, h, 4);
 	}
 
 	mutate(cfg) {
@@ -182,8 +219,8 @@ export class Rectangle extends Polygon {
 }
 
 export class Ellipse extends Shape {
-	constructor(w, h) {
-		super(w, h);
+	constructor(cfg, w, h) {
+		super(cfg, w, h);
 
 		this.center = Shape.randomPoint(w, h);
 		this.rx = 1 + ~~(Math.random() * 20);
@@ -204,6 +241,7 @@ export class Ellipse extends Shape {
 		node.setAttribute("cy", this.center[1]);
 		node.setAttribute("rx", this.rx);
 		node.setAttribute("ry", this.ry);
+		this.addBlur(node);
 		return node;
 	}
 
@@ -246,76 +284,9 @@ export class Ellipse extends Shape {
 	}
 }
 
-export class Smiley extends Shape {
-	constructor(w, h) {
-		super(w, h);
-		this.center = Shape.randomPoint(w, h);
-		this.text = "☺";
-		this.fontSize = 16;
-		this.computeBbox();
-	}
-
-	computeBbox() {
-		let tmp = new Canvas(1, 1);
-		tmp.ctx.font = `${this.fontSize}px sans-serif`;
-		let w = ~~(tmp.ctx.measureText(this.text).width);
-
-		this.bbox = {
-			left: ~~(this.center[0] - w/2),
-			top: ~~(this.center[1] - this.fontSize/2),
-			width: w,
-			height: this.fontSize
-		}
-		return this;
-	}
-
-	render(ctx) {
-		ctx.textAlign = "center";
-		ctx.textBaseline = "middle";
-		ctx.font = `${this.fontSize}px sans-serif`;
-		ctx.fillText(this.text, this.center[0], this.center[1]);
-	}
-
-	mutate(cfg) {
-		let clone = new this.constructor(0, 0)
-		clone.center = this.center.slice();
-		clone.fontSize = this.fontSize;
-
-		switch (Math.floor(Math.random()*2)) {
-			case 0:
-				let angle = Math.random() * 2 * Math.PI;
-				let radius = Math.random() * 20;
-				clone.center[0] += ~~(radius * Math.cos(angle));
-				clone.center[1] += ~~(radius * Math.sin(angle));
-			break;
-
-			case 1:
-				clone.fontSize += (Math.random() > 0.5 ? 1 : -1);
-				clone.fontSize = Math.max(10, clone.fontSize);
-			break;
-		}
-
-		return clone.computeBbox();
-	}
-
-	toSVG() {
-		let text = document.createElementNS(util.SVGNS, "text");
-		text.appendChild(document.createTextNode(this.text));
-
-		text.setAttribute("text-anchor", "middle");
-		text.setAttribute("dominant-baseline", "central");
-		text.setAttribute("font-size", this.fontSize);
-		text.setAttribute("font-family", "sans-serif");
-		text.setAttribute("x", this.center[0]);
-		text.setAttribute("y", this.center[1]);
-
-		return text;
-	}
-}
-
 export class Debug extends Shape {
-	constructor(w, h) {
-		super(w, h);
+	constructor(cfg, w, h) {
+		super(cfg, w, h);
 		this.bbox = {left: 0, top: 0, width:w, height: h};
 	}
 
