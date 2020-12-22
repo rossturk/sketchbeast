@@ -19,7 +19,9 @@
             <form id="mainform" method="post" enctype="multipart/form-data">
               <input type="file" id="fileinput" name="image" accept="image/*" />
               <input type="hidden" id="svgsrc" />
-              <p><span class="clause">sketchbeast<span class="beforetext">will use
+              <p><span class="clause">sketchbeast
+              <span id="mood"></span>
+              <span class="beforetext">will use
               <label for="fileinput" class="button" id="fileupload">your uploaded file</label></span></span>
               <span class="clause"><span class="beforetext">to make a</span><span class="duringtext">is making a</span>
               <select name="blur" id="blur">
@@ -36,6 +38,7 @@
                   <option value="2">triangles</option>
                   <option value="3">ellipses</option>
                   <option value="4">polygons</option>
+                  <option value="5">squiggles</option>
                 </select>
               </span>
               <span class="beforetext clause">when you press <input type="button" value="this button" id="process" /></span>
@@ -75,6 +78,30 @@
       reader.readAsDataURL(file);
       updateImageSize();
 
+  }
+
+  function changemood(newmood) {
+    var mood = document.getElementById("mood");
+    switch (newmood) {
+      case 0:
+        mood.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" fill="currentColor" class="bi bi-emoji-smile-fill" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zM7 6.5C7 7.328 6.552 8 6 8s-1-.672-1-1.5S5.448 5 6 5s1 .672 1 1.5zM4.285 9.567a.5.5 0 0 1 .683.183A3.498 3.498 0 0 0 8 11.5a3.498 3.498 0 0 0 3.032-1.75.5.5 0 1 1 .866.5A4.498 4.498 0 0 1 8 12.5a4.498 4.498 0 0 1-3.898-2.25.5.5 0 0 1 .183-.683zM10 8c.552 0 1-.672 1-1.5S10.552 5 10 5s-1 .672-1 1.5S9.448 8 10 8z"/></svg>';
+        break;
+      case 1:
+        mood.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" fill="currentColor" class="bi bi-emoji-neutral-fill" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zM7 6.5C7 7.328 6.552 8 6 8s-1-.672-1-1.5S5.448 5 6 5s1 .672 1 1.5zm-3 4a.5.5 0 0 1 .5-.5h7a.5.5 0 0 1 0 1h-7a.5.5 0 0 1-.5-.5zM10 8c.552 0 1-.672 1-1.5S10.552 5 10 5s-1 .672-1 1.5S9.448 8 10 8z"/></svg>';
+        break;
+      case 2:
+        mood.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" fill="currentColor" class="bi bi-emoji-expressionless-fill" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zM4.5 6a.5.5 0 0 0 0 1h2a.5.5 0 0 0 0-1h-2zm5 0a.5.5 0 0 0 0 1h2a.5.5 0 0 0 0-1h-2zm-5 4a.5.5 0 0 0 0 1h7a.5.5 0 0 0 0-1h-7z"/></svg>';
+        break;
+      case 3:
+        mood.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" fill="currentColor" class="bi bi-emoji-frown-fill" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zM7 6.5C7 7.328 6.552 8 6 8s-1-.672-1-1.5S5.448 5 6 5s1 .672 1 1.5zm-2.715 5.933a.5.5 0 0 0 .683-.183A3.498 3.498 0 0 1 8 10.5c1.295 0 2.426.703 3.032 1.75a.5.5 0 0 0 .866-.5A4.498 4.498 0 0 0 8 9.5a4.5 4.5 0 0 0-3.898 2.25.5.5 0 0 0 .183.683zM10 8c.552 0 1-.672 1-1.5S10.552 5 10 5s-1 .672-1 1.5S9.448 8 10 8z"/></svg>';
+        break;
+      case 4:
+        mood.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" fill="currentColor" class="bi bi-emoji-angry-fill" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zM4.053 4.276a.5.5 0 0 1 .67-.223l2 1a.5.5 0 0 1 .166.76c.071.206.111.44.111.687C7 7.328 6.552 8 6 8s-1-.672-1-1.5c0-.408.109-.778.285-1.049l-1.009-.504a.5.5 0 0 1-.223-.67zm.232 8.157a.5.5 0 0 0 .683-.183A3.498 3.498 0 0 1 8 10.5c1.295 0 2.426.703 3.032 1.75a.5.5 0 1 0 .866-.5A4.498 4.498 0 0 0 8 9.5a4.5 4.5 0 0 0-3.898 2.25.5.5 0 0 0 .183.683zM10 8c.552 0 1-.672 1-1.5 0-.408-.109-.778-.285-1.049l1.009-.504a.5.5 0 1 0-.448-.894l-2 1a.5.5 0 0 0-.165.76A2.12 2.12 0 0 0 9 6.5c0 .828.448 1.5 1 1.5z"/></svg>';
+        break;
+      case 5:
+        mood.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" fill="currentColor" class="bi bi-emoji-dizzy-fill" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M8 15A7 7 0 1 0 8 1a7 7 0 0 0 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/><path fill-rule="evenodd" d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zM4.146 5.146a.5.5 0 0 1 .708 0l.646.647.646-.647a.5.5 0 1 1 .708.708l-.647.646.647.646a.5.5 0 1 1-.708.708L5.5 7.207l-.646.647a.5.5 0 1 1-.708-.708l.647-.646-.647-.646a.5.5 0 0 1 0-.708zm5 0a.5.5 0 0 1 .708 0l.646.647.646-.647a.5.5 0 0 1 .708.708l-.647.646.647.646a.5.5 0 0 1-.708.708l-.646-.647-.646.647a.5.5 0 1 1-.708-.708l.647-.646-.647-.646a.5.5 0 0 1 0-.708zM8 13a2 2 0 1 0 0-4 2 2 0 0 0 0 4z"/></svg>';
+        break;
+    }
   }
 
   function addThumbnail() {
@@ -123,7 +150,7 @@
     var blur = document.getElementById('blur').value;
 
     var config = {
-      computeSize: 100,
+      computeSize: 500,
       viewHeight: $("#workpane").height(),
       viewWidth: ($("#workpane").width() / 2) - 40,
       steps: parseInt(steps),
@@ -201,6 +228,8 @@
     updateImageSize();
     stopProcessing();
 
+    changemood(0);
+
     $(window).keydown(function(event){
       if(event.keyCode == 13) {
         event.preventDefault();
@@ -237,9 +266,18 @@
   }, false);
 
   document.getElementById('output').addEventListener('shape', function (e) {
-    if (e.detail > 0) {
+    if (e.detail.stepsremaining > 0) {
+
+      var mood;
+      if (e.detail.badsteps > 100) { changemood(5); } 
+      if (e.detail.badsteps > 80) { changemood(4); } 
+      else if (e.detail.badsteps > 50) { changemood(3); } 
+      else if (e.detail.badsteps > 10) { changemood(2); } 
+      else if (e.detail.badsteps > 2) { changemood(1); } 
+      else { changemood(0); }
+
       var count = document.getElementById("currentcount");
-      count.innerHTML = e.detail;
+      count.innerHTML = e.detail.stepsremaining;
     }
     updateImageSize();
   }, false);

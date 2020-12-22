@@ -55,13 +55,12 @@ export default class Canvas {
 			cp.setAttribute("id", "clip");
 			cp.setAttribute("clipPathUnits", "objectBoundingBox");
 			
-			let rect = svgRect(cfg.naturalWidth, cfg.naturalHeight);
+			let rect = svgRect(cfg.width, cfg.height);
 			cp.appendChild(rect);
 
-			rect = svgRect(cfg.naturalWidth, cfg.naturalHeight);
+			rect = svgRect(cfg.width, cfg.height);
 			rect.setAttribute("fill", cfg.fill);
 			node.appendChild(rect);
-
 
 			['0.2', '0.6', '1'].forEach(function(item){
 				let fe = document.createElementNS(util.SVGNS, "feGaussianBlur");

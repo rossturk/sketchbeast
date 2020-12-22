@@ -14,9 +14,11 @@ export default class Step {
 	}
 
 	toSVG() {
+		this.shape.color = this.color;
+		this.shape.alpha = this.alpha.toFixed(2);
 		let node = this.shape.toSVG();
-		node.setAttribute("fill", this.color);
-		node.setAttribute("fill-opacity", this.alpha.toFixed(2));
+		// node.setAttribute("fill", this.color);
+		// node.setAttribute("fill-opacity", this.alpha.toFixed(2));
 		return node;
 	}
 
@@ -36,6 +38,11 @@ export default class Step {
 			current: state.canvas.getImageData(),
 			target: state.target.getImageData()
 		};
+
+		// var c = document.getElementById("compute");
+		// var ctx = c.getContext("2d");
+		// ctx.clearRect(0, 0, c.width, c.height);
+		// ctx.putImageData(state.canvas.getImageData(), 0,0);
 
 		let {color, differenceChange} = util.computeColorAndDifferenceChange(offset, imageData, this.alpha);
 		this.color = color;

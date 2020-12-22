@@ -181,13 +181,12 @@
 				cp.setAttribute("id", "clip");
 				cp.setAttribute("clipPathUnits", "objectBoundingBox");
 				
-				let rect = svgRect(cfg.naturalWidth, cfg.naturalHeight);
+				let rect = svgRect(cfg.width, cfg.height);
 				cp.appendChild(rect);
 
-				rect = svgRect(cfg.naturalWidth, cfg.naturalHeight);
+				rect = svgRect(cfg.width, cfg.height);
 				rect.setAttribute("fill", cfg.fill);
 				node.appendChild(rect);
-
 
 				['0.2', '0.6', '1'].forEach(function(item){
 					let fe = document.createElementNS(SVGNS, "feGaussianBlur");
@@ -334,9 +333,11 @@
 		}
 
 		toSVG() {
+			this.shape.color = this.color;
+			this.shape.alpha = this.alpha.toFixed(2);
 			let node = this.shape.toSVG();
-			node.setAttribute("fill", this.color);
-			node.setAttribute("fill-opacity", this.alpha.toFixed(2));
+			// node.setAttribute("fill", this.color);
+			// node.setAttribute("fill-opacity", this.alpha.toFixed(2));
 			return node;
 		}
 
@@ -356,6 +357,11 @@
 				current: state.canvas.getImageData(),
 				target: state.target.getImageData()
 			};
+
+			// var c = document.getElementById("compute");
+			// var ctx = c.getContext("2d");
+			// ctx.clearRect(0, 0, c.width, c.height);
+			// ctx.putImageData(state.canvas.getImageData(), 0,0);
 
 			let {color, differenceChange} = computeColorAndDifferenceChange(offset, imageData, this.alpha);
 			this.color = color;
@@ -394,6 +400,9 @@
 		constructor(cfg, w, h) {
 			this.cfg = cfg;
 			this.bbox = {};
+			this.type = "Shape";
+			this.color = "#fff"; // gets calculated during Step.compute()
+			this.alpha = this.cfg.alpha;
 		}
 
 		mutate(cfg) { return this; }
@@ -412,7 +421,6 @@
 		}
 
 		addBlur(element) {
-
 			switch (this.cfg.blur) {
 				case 0:
 					break;
@@ -450,9 +458,101 @@
 		render(ctx) {}
 	}
 
+	class Squiggle extends Shape {
+		constructor(cfg, w, h) {
+			super(cfg, w, h);
+			this.type = "Squiggle";
+			this.points = this._createPoints(w, h);
+			this.computeBbox();
+		}
+
+		_createPoints(w, h) {
+			let first = Shape.randomPoint(w, h);
+			let points = [first];
+
+			let scale = Math.random();
+			let sw = ~~(w * scale);
+			let sh = ~~(h * scale);
+			let xoffset = ~~(points[0][0] - (sw / 2));
+			let yoffset = ~~(points[0][1] - (sh / 2));
+		
+			for (let i=0;i<3;i++) {
+				let point = Shape.randomPoint(sw,sh);
+				points.push([point[0]+xoffset, point[1]+yoffset]);
+			}
+			return points;
+		}
+
+		render(ctx) {
+			ctx.beginPath();
+			ctx.moveTo(this.points[0][0],this.points[0][1]);
+			ctx.lineCap = 'round';
+			ctx.bezierCurveTo(
+				this.points[1][0],this.points[1][1],
+				this.points[2][0],this.points[2][1],
+				this.points[3][0],this.points[3][1]
+			);
+			ctx.stroke();
+		}
+
+		toSVG() {
+			let path = document.createElementNS(SVGNS, "path");
+			let d = "M "+this.points[0][0]+" "+this.points[0][1]+" "+
+				"C "+this.points[1][0]+" "+this.points[1][1]+", "+
+				this.points[2][0]+" "+this.points[2][1]+", "+
+				this.points[3][0]+" "+this.points[3][1];
+			path.setAttribute("d", d);
+			path.setAttribute("stroke", this.color);
+			path.setAttribute("fill", "none");
+			path.setAttribute("stroke-linecap", "round");
+			this.addBlur(path);
+			return path;
+		}
+		
+		mutate(cfg) {
+			let clone = new this.constructor(cfg, 0, 0);
+			clone.points = this.points.map(point => point.slice());
+
+			let index = Math.floor(Math.random() * this.points.length);
+			let point = clone.points[index];
+
+			let angle = Math.random() * 2 * Math.PI;
+			let radius = Math.random() * 20;
+			point[0] += ~~(radius * Math.cos(angle));
+			point[1] += ~~(radius * Math.sin(angle));
+
+			return clone.computeBbox();
+		}
+
+		computeBbox() {
+			let min = [
+				this.points.reduce((v, p) => Math.min(v, p[0]), Infinity),
+				this.points.reduce((v, p) => Math.min(v, p[1]), Infinity)
+			];
+			let max = [
+				this.points.reduce((v, p) => Math.max(v, p[0]), -Infinity),
+				this.points.reduce((v, p) => Math.max(v, p[1]), -Infinity)
+			];
+
+			this.bbox = {
+				left: min[0],
+				top: min[1],
+				width: (max[0]-min[0]),
+				height: (max[1]-min[1])
+			};
+
+			if (this.bbox.width < 1) { this.bbox.width = 1;}
+			if (this.bbox.height < 1) { this.bbox.height = 1;}
+
+			return this;
+		}
+
+	}
+
 	class Polygon extends Shape {
 		constructor(cfg, w, h, count) {
 			super(cfg, w, h);
+			this.type = "Polygon";
 			this.points = this._createPoints(w, h, count);
 			this.computeBbox();
 		}
@@ -477,6 +577,8 @@
 				return `${cmd}${point.join(",")}`;
 			}).join("");
 			path.setAttribute("d", `${d}Z`);
+			path.setAttribute("fill", this.color);
+			path.setAttribute("fill-opacity", this.alpha);
 			this.addBlur(path);
 			return path;
 		}
@@ -535,18 +637,21 @@
 	class RandomPolygon extends Polygon {
 		constructor(cfg, w,h) {
 			super(cfg, w, h, Math.floor(Math.random()*4)+4);
+			this.type = "RandomPolygon";
 		}
 	}
 
 	class Triangle extends Polygon {
 		constructor(cfg, w, h) {
 			super(cfg, w, h, 3);
+			this.type = "Triangle";
 		}
 	}
 
 	class Rectangle extends Polygon {
 		constructor(cfg, w, h) {
 			super(cfg, w, h, 4);
+			this.type = "Rectangle";
 		}
 
 		mutate(cfg) {
@@ -598,6 +703,7 @@
 	class Ellipse extends Shape {
 		constructor(cfg, w, h) {
 			super(cfg, w, h);
+			this.type = "Ellipse";
 
 			this.center = Shape.randomPoint(w, h);
 			this.rx = 1 + ~~(Math.random() * 20);
@@ -618,6 +724,8 @@
 			node.setAttribute("cy", this.center[1]);
 			node.setAttribute("rx", this.rx);
 			node.setAttribute("ry", this.ry);
+			node.setAttribute("fill", this.color);
+			node.setAttribute("fill-opacity", this.alpha);
 			this.addBlur(node);
 			return node;
 		}
@@ -681,10 +789,10 @@
 				if (step.distance < this.state.distance) { /* better than current state, epic */
 					this.state = step.apply(this.state);
 					// console.log("switched to new state (%s) with distance: %s", this._steps, this.state.distance);
-					this.onStep(step);
-				} else { /* worse than current state, discard */
-					this.onStep(null);
+				} else { /* we made a shitty one */
+					step.badstep = true;
 				}
+				this.onStep(step);
 				this._continue();
 			});
 		}
@@ -761,6 +869,14 @@
 					this.cfg.shapeTypes.push(Rectangle);
 					this.cfg.shapeTypes.push(Ellipse);
 					this.cfg.shapeTypes.push(RandomPolygon);
+					this.cfg.shapeTypes.push(Squiggle);
+					this.cfg.shapeTypes.push(Squiggle);
+					this.cfg.shapeTypes.push(Squiggle);
+					this.cfg.shapeTypes.push(Squiggle);
+					this.cfg.shapeTypes.push(Squiggle);
+					this.cfg.shapeTypes.push(Squiggle);
+					this.cfg.shapeTypes.push(Squiggle);
+					this.cfg.shapeTypes.push(Squiggle);
 					break;
 				case 1:
 					this.cfg.shapeTypes.push(Rectangle);
@@ -773,6 +889,9 @@
 					break;
 				case 4:
 					this.cfg.shapeTypes.push(RandomPolygon);
+					break;
+				case 5:
+					this.cfg.shapeTypes.push(Squiggle);
 					break;
 			}
 		}
@@ -787,6 +906,7 @@
 
 			let optimizer = new Optimizer(original, this.cfg);
 			let steps = 0;
+			let badsteps = 0;
 
 			let cfg2 = Object.assign({}, this.cfg, {width:this.cfg.naturalWidth, height:this.cfg.naturalHeight});
 			let result = Canvas.empty(cfg2, false);
@@ -814,14 +934,20 @@
 			let serializer = new XMLSerializer();
 
 			optimizer.onStep = (step) => {
-				if (step) {
-					result.drawStep(step);
-					svg.appendChild(step.toSVG());
-					this.cfg.nodes.svgsrc.value = serializer.serializeToString(svg);
-					let stepsremaining = this.cfg.steps - ++steps;
-					const event = new CustomEvent('shape',{ detail: stepsremaining } );
-					this.cfg.nodes.output.dispatchEvent(event);
+				result.drawStep(step);
+				svg.appendChild(step.toSVG());
+				this.cfg.nodes.svgsrc.value = serializer.serializeToString(svg);
+
+				if (step.badstep) {
+					++badsteps;
 				}
+
+				let stepsremaining = this.cfg.steps - ++steps;
+				var event = new CustomEvent("shape", {'detail': {
+					stepsremaining: stepsremaining,
+					badsteps: badsteps
+				}});
+				this.cfg.nodes.output.dispatchEvent(event);
 			};
 			optimizer.start();
 		}

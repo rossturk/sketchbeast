@@ -17,6 +17,9 @@ export class Shape {
 	constructor(cfg, w, h) {
 		this.cfg = cfg;
 		this.bbox = {};
+		this.type = "Shape";
+		this.color = "#fff"; // gets calculated during Step.compute()
+		this.alpha = this.cfg.alpha;
 	}
 
 	mutate(cfg) { return this; }
@@ -35,7 +38,6 @@ export class Shape {
 	}
 
 	addBlur(element) {
-
 		switch (this.cfg.blur) {
 			case 0:
 				break;
@@ -73,9 +75,101 @@ export class Shape {
 	render(ctx) {}
 }
 
+export class Squiggle extends Shape {
+	constructor(cfg, w, h) {
+		super(cfg, w, h);
+		this.type = "Squiggle";
+		this.points = this._createPoints(w, h);
+		this.computeBbox();
+	}
+
+	_createPoints(w, h) {
+		let first = Shape.randomPoint(w, h);
+		let points = [first];
+
+		let scale = Math.random();
+		let sw = ~~(w * scale);
+		let sh = ~~(h * scale);
+		let xoffset = ~~(points[0][0] - (sw / 2));
+		let yoffset = ~~(points[0][1] - (sh / 2));
+	
+		for (let i=0;i<3;i++) {
+			let point = Shape.randomPoint(sw,sh);
+			points.push([point[0]+xoffset, point[1]+yoffset]);
+		}
+		return points;
+	}
+
+	render(ctx) {
+		ctx.beginPath();
+		ctx.moveTo(this.points[0][0],this.points[0][1]);
+		ctx.lineCap = 'round';
+		ctx.bezierCurveTo(
+			this.points[1][0],this.points[1][1],
+			this.points[2][0],this.points[2][1],
+			this.points[3][0],this.points[3][1]
+		);
+		ctx.stroke();
+	}
+
+	toSVG() {
+		let path = document.createElementNS(util.SVGNS, "path");
+		let d = "M "+this.points[0][0]+" "+this.points[0][1]+" "+
+			"C "+this.points[1][0]+" "+this.points[1][1]+", "+
+			this.points[2][0]+" "+this.points[2][1]+", "+
+			this.points[3][0]+" "+this.points[3][1];
+		path.setAttribute("d", d);
+		path.setAttribute("stroke", this.color);
+		path.setAttribute("fill", "none");
+		path.setAttribute("stroke-linecap", "round");
+		this.addBlur(path);
+		return path;
+	}
+	
+	mutate(cfg) {
+		let clone = new this.constructor(cfg, 0, 0);
+		clone.points = this.points.map(point => point.slice());
+
+		let index = Math.floor(Math.random() * this.points.length);
+		let point = clone.points[index];
+
+		let angle = Math.random() * 2 * Math.PI;
+		let radius = Math.random() * 20;
+		point[0] += ~~(radius * Math.cos(angle));
+		point[1] += ~~(radius * Math.sin(angle));
+
+		return clone.computeBbox();
+	}
+
+	computeBbox() {
+		let min = [
+			this.points.reduce((v, p) => Math.min(v, p[0]), Infinity),
+			this.points.reduce((v, p) => Math.min(v, p[1]), Infinity)
+		];
+		let max = [
+			this.points.reduce((v, p) => Math.max(v, p[0]), -Infinity),
+			this.points.reduce((v, p) => Math.max(v, p[1]), -Infinity)
+		];
+
+		this.bbox = {
+			left: min[0],
+			top: min[1],
+			width: (max[0]-min[0]),
+			height: (max[1]-min[1])
+		};
+
+		if (this.bbox.width < 1) { this.bbox.width = 1;}
+		if (this.bbox.height < 1) { this.bbox.height = 1;}
+
+		return this;
+	}
+
+}
+
 class Polygon extends Shape {
 	constructor(cfg, w, h, count) {
 		super(cfg, w, h);
+		this.type = "Polygon";
 		this.points = this._createPoints(w, h, count);
 		this.computeBbox();
 	}
@@ -100,6 +194,8 @@ class Polygon extends Shape {
 			return `${cmd}${point.join(",")}`;
 		}).join("");
 		path.setAttribute("d", `${d}Z`);
+		path.setAttribute("fill", this.color);
+		path.setAttribute("fill-opacity", this.alpha);
 		this.addBlur(path);
 		return path;
 	}
@@ -158,18 +254,21 @@ class Polygon extends Shape {
 export class RandomPolygon extends Polygon {
 	constructor(cfg, w,h) {
 		super(cfg, w, h, Math.floor(Math.random()*4)+4);
+		this.type = "RandomPolygon";
 	}
 }
 
 export class Triangle extends Polygon {
 	constructor(cfg, w, h) {
 		super(cfg, w, h, 3);
+		this.type = "Triangle";
 	}
 }
 
 export class Rectangle extends Polygon {
 	constructor(cfg, w, h) {
 		super(cfg, w, h, 4);
+		this.type = "Rectangle";
 	}
 
 	mutate(cfg) {
@@ -221,6 +320,7 @@ export class Rectangle extends Polygon {
 export class Ellipse extends Shape {
 	constructor(cfg, w, h) {
 		super(cfg, w, h);
+		this.type = "Ellipse";
 
 		this.center = Shape.randomPoint(w, h);
 		this.rx = 1 + ~~(Math.random() * 20);
@@ -241,6 +341,8 @@ export class Ellipse extends Shape {
 		node.setAttribute("cy", this.center[1]);
 		node.setAttribute("rx", this.rx);
 		node.setAttribute("ry", this.ry);
+		node.setAttribute("fill", this.color);
+		node.setAttribute("fill-opacity", this.alpha);
 		this.addBlur(node);
 		return node;
 	}

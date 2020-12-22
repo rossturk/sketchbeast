@@ -1,6 +1,6 @@
 import Canvas from "./canvas.js";
 import Optimizer from "./optimizer.js";
-import {Triangle, Rectangle, Ellipse, RandomPolygon} from "./shape.js";
+import {Triangle, Rectangle, Ellipse, RandomPolygon, Squiggle} from "./shape.js";
 
 class Beast {
 
@@ -13,6 +13,14 @@ class Beast {
 				this.cfg.shapeTypes.push(Rectangle);
 				this.cfg.shapeTypes.push(Ellipse);
 				this.cfg.shapeTypes.push(RandomPolygon);
+				this.cfg.shapeTypes.push(Squiggle);
+				this.cfg.shapeTypes.push(Squiggle);
+				this.cfg.shapeTypes.push(Squiggle);
+				this.cfg.shapeTypes.push(Squiggle);
+				this.cfg.shapeTypes.push(Squiggle);
+				this.cfg.shapeTypes.push(Squiggle);
+				this.cfg.shapeTypes.push(Squiggle);
+				this.cfg.shapeTypes.push(Squiggle);
 				break;
 			case 1:
 				this.cfg.shapeTypes.push(Rectangle);
@@ -25,6 +33,9 @@ class Beast {
 				break;
 			case 4:
 				this.cfg.shapeTypes.push(RandomPolygon);
+				break;
+			case 5:
+				this.cfg.shapeTypes.push(Squiggle);
 				break;
 		}
 	}
@@ -39,6 +50,7 @@ class Beast {
 
 		let optimizer = new Optimizer(original, this.cfg);
 		let steps = 0;
+		let badsteps = 0;
 
 		let cfg2 = Object.assign({}, this.cfg, {width:this.cfg.naturalWidth, height:this.cfg.naturalHeight});
 		let result = Canvas.empty(cfg2, false);
@@ -66,14 +78,20 @@ class Beast {
 		let serializer = new XMLSerializer();
 
 		optimizer.onStep = (step) => {
-			if (step) {
-				result.drawStep(step);
-				svg.appendChild(step.toSVG());
-				this.cfg.nodes.svgsrc.value = serializer.serializeToString(svg);
-				let stepsremaining = this.cfg.steps - ++steps;
-				const event = new CustomEvent('shape',{ detail: stepsremaining } );
-				this.cfg.nodes.output.dispatchEvent(event);
+			result.drawStep(step);
+			svg.appendChild(step.toSVG());
+			this.cfg.nodes.svgsrc.value = serializer.serializeToString(svg);
+
+			if (step.badstep) {
+				++badsteps;
 			}
+
+			let stepsremaining = this.cfg.steps - ++steps;
+			var event = new CustomEvent("shape", {'detail': {
+				stepsremaining: stepsremaining,
+				badsteps: badsteps
+			}});
+			this.cfg.nodes.output.dispatchEvent(event);
 		}
 		optimizer.start();
 	}

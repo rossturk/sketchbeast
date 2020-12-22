@@ -23,10 +23,10 @@ export default class Optimizer {
 			if (step.distance < this.state.distance) { /* better than current state, epic */
 				this.state = step.apply(this.state);
 				// console.log("switched to new state (%s) with distance: %s", this._steps, this.state.distance);
-				this.onStep(step);
-			} else { /* worse than current state, discard */
-				this.onStep(null);
+			} else { /* we made a shitty one */
+				step.badstep = true;
 			}
+			this.onStep(step);
 			this._continue();
 		});
 	}
