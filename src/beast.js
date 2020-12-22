@@ -50,7 +50,6 @@ class Beast {
 
 		let optimizer = new Optimizer(original, this.cfg);
 		let steps = 0;
-		let badsteps = 0;
 
 		let cfg2 = Object.assign({}, this.cfg, {width:this.cfg.naturalWidth, height:this.cfg.naturalHeight});
 		let result = Canvas.empty(cfg2, false);
@@ -81,15 +80,9 @@ class Beast {
 			result.drawStep(step);
 			svg.appendChild(step.toSVG());
 			this.cfg.nodes.svgsrc.value = serializer.serializeToString(svg);
-
-			if (step.badstep) {
-				++badsteps;
-			}
-
 			let stepsremaining = this.cfg.steps - ++steps;
 			var event = new CustomEvent("shape", {'detail': {
-				stepsremaining: stepsremaining,
-				badsteps: badsteps
+				stepsremaining: stepsremaining
 			}});
 			this.cfg.nodes.output.dispatchEvent(event);
 		}

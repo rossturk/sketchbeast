@@ -76,10 +76,6 @@ select, input, #currentcount {
     color: #3991af;
 }       
 
-#mood {
-    color: #3991af;
-}
-
 input::-webkit-outer-spin-button,
 input::-webkit-inner-spin-button {
     -webkit-appearance: none;
