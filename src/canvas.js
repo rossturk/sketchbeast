@@ -179,7 +179,7 @@ export default class Canvas {
 
 	drawStep(step) {
 		this.ctx.globalAlpha = step.alpha;
-		this.ctx.fillStyle = step.color;
+		step.shape.color = step.color;
 		step.shape.render(this.ctx);
 		return this;
 	}

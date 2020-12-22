@@ -104,6 +104,8 @@ export class Squiggle extends Shape {
 		ctx.beginPath();
 		ctx.moveTo(this.points[0][0],this.points[0][1]);
 		ctx.lineCap = 'round';
+		ctx.lineWidth = this.cfg.linewidth;
+		ctx.strokeStyle = this.color;
 		ctx.bezierCurveTo(
 			this.points[1][0],this.points[1][1],
 			this.points[2][0],this.points[2][1],
@@ -120,6 +122,7 @@ export class Squiggle extends Shape {
 			this.points[3][0]+" "+this.points[3][1];
 		path.setAttribute("d", d);
 		path.setAttribute("stroke", this.color);
+		path.setAttribute("stroke-width", this.cfg.linewidth);
 		path.setAttribute("fill", "none");
 		path.setAttribute("stroke-linecap", "round");
 		this.addBlur(path);
@@ -183,6 +186,7 @@ class Polygon extends Shape {
 				ctx.moveTo(x, y);
 			}
 		});
+		ctx.fillStyle = this.color;
 		ctx.closePath();
 		ctx.fill();
 	}
@@ -332,6 +336,7 @@ export class Ellipse extends Shape {
 	render(ctx) {
 		ctx.beginPath();
 		ctx.ellipse(this.center[0], this.center[1], this.rx, this.ry, 0, 0, 2*Math.PI, false);
+		ctx.fillStyle = this.color;
 		ctx.fill();
 	}
 
