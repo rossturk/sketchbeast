@@ -75,11 +75,192 @@ export class Shape {
 	render(ctx) {}
 }
 
+export class Line extends Shape {
+	constructor(cfg, w, h) {
+		super(cfg, w, h);
+		this.type = "Line";
+		this.points = this._createPoints(w, h);
+		this.linewidth = (Math.random() * (this.cfg.maxlinewidth - this.cfg.minlinewidth)) + this.cfg.minlinewidth;
+		this.computeBbox();
+	}
+
+	_createPoints(w, h) {
+		let first = Shape.randomPoint(w, h);
+		let points = [first];
+		let angle = Math.random() * 2 * Math.PI;
+		let radius = (Math.random() * 15) + 5;
+		points.push([
+			first[0] + ~~(radius * Math.cos(angle)),
+			first[1] + ~~(radius * Math.sin(angle))
+		]);
+		return points;
+	}
+
+	render(ctx) {
+		ctx.beginPath();
+		ctx.lineCap = 'round';
+		this.points.forEach(([x, y], index) => {
+			if (index) {
+				ctx.lineTo(x, y);
+			} else {
+				ctx.moveTo(x, y);
+			}
+		});
+		ctx.stroke();
+	}
+
+	toSVG() {
+		let path = document.createElementNS(util.SVGNS, "path");
+		let d = this.points.map((point, index) => {
+			let cmd = (index ? "L" : "M");
+			return `${cmd}${point.join(",")}`;
+		}).join("");
+		path.setAttribute("d", d);
+		path.setAttribute("stroke", this.color);
+		path.setAttribute("stroke-width", this.linewidth);
+		path.setAttribute("fill", "none");
+		path.setAttribute("stroke-linecap", "round");
+		this.addBlur(path);
+		return path;
+	}
+	
+	mutate(cfg) {
+		let clone = new this.constructor(cfg, 0, 0);
+		clone.points = this.points.map(point => point.slice());
+
+		let index = Math.floor(Math.random() * this.points.length);
+		let point = clone.points[index];
+
+		let angle = Math.random() * 2 * Math.PI;
+		let radius = Math.random() * 9;
+		point[0] += ~~(radius * Math.cos(angle));
+		point[1] += ~~(radius * Math.sin(angle));
+
+		return clone.computeBbox();
+	}
+
+	computeBbox() {
+		let min = [
+			this.points.reduce((v, p) => Math.min(v, p[0]), Infinity),
+			this.points.reduce((v, p) => Math.min(v, p[1]), Infinity)
+		];
+		let max = [
+			this.points.reduce((v, p) => Math.max(v, p[0]), -Infinity),
+			this.points.reduce((v, p) => Math.max(v, p[1]), -Infinity)
+		];
+
+		this.bbox = {
+			left: min[0],
+			top: min[1],
+			width: (max[0]-min[0]),
+			height: (max[1]-min[1])
+		};
+
+		if (this.bbox.width < 1) { this.bbox.width = 1;}
+		if (this.bbox.height < 1) { this.bbox.height = 1;}
+
+		return this;
+	}
+}
+
+export class Scribble extends Shape {
+	constructor(cfg, w, h) {
+		super(cfg, w, h);
+		this.type = "Scribble";
+		this.points = this._createPoints(w, h);
+		this.linewidth = (Math.random() * (this.cfg.maxlinewidth - this.cfg.minlinewidth)) + this.cfg.minlinewidth;
+		this.computeBbox();
+	}
+
+	_createPoints(w, h) {
+		let first = Shape.randomPoint(w, h);
+		let points = [first];
+
+		for (let i=1;i<5;i++) {
+			let angle = Math.random() * 2 * Math.PI;
+			let radius = (Math.random() * 17) + 1;
+			points.push([
+				first[0] + ~~(radius * Math.cos(angle)),
+				first[1] + ~~(radius * Math.sin(angle))
+			]);
+		}
+
+		return points;
+	}
+
+	render(ctx) {
+		ctx.beginPath();
+		ctx.lineCap = 'round';
+		this.points.forEach(([x, y], index) => {
+			if (index) {
+				ctx.lineTo(x, y);
+			} else {
+				ctx.moveTo(x, y);
+			}
+		});
+		ctx.stroke();
+	}
+
+	toSVG() {
+		let path = document.createElementNS(util.SVGNS, "path");
+		let d = this.points.map((point, index) => {
+			let cmd = (index ? "L" : "M");
+			return `${cmd}${point.join(",")}`;
+		}).join("");
+		path.setAttribute("d", d);
+		path.setAttribute("stroke", this.color);
+		path.setAttribute("stroke-width", this.linewidth);
+		path.setAttribute("fill", "none");
+		path.setAttribute("stroke-linecap", "round");
+		this.addBlur(path);
+		return path;
+	}
+	
+	mutate(cfg) {
+		let clone = new this.constructor(cfg, 0, 0);
+		clone.points = this.points.map(point => point.slice());
+
+		let index = Math.floor(Math.random() * this.points.length);
+		let point = clone.points[index];
+
+		let angle = Math.random() * 2 * Math.PI;
+		let radius = Math.random() * 9;
+		point[0] += ~~(radius * Math.cos(angle));
+		point[1] += ~~(radius * Math.sin(angle));
+
+		return clone.computeBbox();
+	}
+
+	computeBbox() {
+		let min = [
+			this.points.reduce((v, p) => Math.min(v, p[0]), Infinity),
+			this.points.reduce((v, p) => Math.min(v, p[1]), Infinity)
+		];
+		let max = [
+			this.points.reduce((v, p) => Math.max(v, p[0]), -Infinity),
+			this.points.reduce((v, p) => Math.max(v, p[1]), -Infinity)
+		];
+
+		this.bbox = {
+			left: min[0],
+			top: min[1],
+			width: (max[0]-min[0]),
+			height: (max[1]-min[1])
+		};
+
+		if (this.bbox.width < 1) { this.bbox.width = 1;}
+		if (this.bbox.height < 1) { this.bbox.height = 1;}
+
+		return this;
+	}
+}
+
 export class Squiggle extends Shape {
 	constructor(cfg, w, h) {
 		super(cfg, w, h);
 		this.type = "Squiggle";
 		this.points = this._createPoints(w, h);
+		this.linewidth = (Math.random() * (this.cfg.maxlinewidth - this.cfg.minlinewidth)) + this.cfg.minlinewidth;
 		this.computeBbox();
 	}
 
@@ -104,7 +285,6 @@ export class Squiggle extends Shape {
 		ctx.beginPath();
 		ctx.moveTo(this.points[0][0],this.points[0][1]);
 		ctx.lineCap = 'round';
-		ctx.lineWidth = this.cfg.linewidth;
 		ctx.strokeStyle = this.color;
 		ctx.bezierCurveTo(
 			this.points[1][0],this.points[1][1],
@@ -122,7 +302,7 @@ export class Squiggle extends Shape {
 			this.points[3][0]+" "+this.points[3][1];
 		path.setAttribute("d", d);
 		path.setAttribute("stroke", this.color);
-		path.setAttribute("stroke-width", this.cfg.linewidth);
+		path.setAttribute("stroke-width", this.linewidth);
 		path.setAttribute("fill", "none");
 		path.setAttribute("stroke-linecap", "round");
 		this.addBlur(path);

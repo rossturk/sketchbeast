@@ -25,6 +25,7 @@ export default class Optimizer {
 				// console.log("switched to new state (%s) with distance: %s", this._steps, this.state.distance);
 				this.onStep(step);
 			} else { /* we made a shitty one */
+				console.log("we made an awful %s", step.shape.type);
 				this.onStep(null);
 			}
 			this._continue();

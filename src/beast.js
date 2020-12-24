@@ -1,12 +1,16 @@
 import Canvas from "./canvas.js";
 import Optimizer from "./optimizer.js";
-import {Triangle, Rectangle, Ellipse, RandomPolygon, Squiggle} from "./shape.js";
+import {Triangle, Rectangle, Ellipse, RandomPolygon, Squiggle, Scribble, Line} from "./shape.js";
 
 class Beast {
 
 	constructor(config) {
 		this.cfg = config;
 		this.cfg.shapeTypes = [];
+
+		this.cfg.minlinewidth = 1; // defaults
+		this.cfg.maxlinewidth = 2; // defaults
+
 		switch (this.cfg.mode) {
 			case 0:
 				this.cfg.shapeTypes.push(Triangle);
@@ -14,13 +18,9 @@ class Beast {
 				this.cfg.shapeTypes.push(Ellipse);
 				this.cfg.shapeTypes.push(RandomPolygon);
 				this.cfg.shapeTypes.push(Squiggle);
-				this.cfg.shapeTypes.push(Squiggle);
-				this.cfg.shapeTypes.push(Squiggle);
-				this.cfg.shapeTypes.push(Squiggle);
-				this.cfg.shapeTypes.push(Squiggle);
-				this.cfg.shapeTypes.push(Squiggle);
-				this.cfg.shapeTypes.push(Squiggle);
-				this.cfg.shapeTypes.push(Squiggle);
+				this.cfg.shapeTypes.push(Scribble);
+				this.cfg.minlinewidth = 1;
+				this.cfg.maxlinewidth = 9;
 				break;
 			case 1:
 				this.cfg.shapeTypes.push(Rectangle);
@@ -36,6 +36,25 @@ class Beast {
 				break;
 			case 5:
 				this.cfg.shapeTypes.push(Squiggle);
+				this.cfg.minlinewidth = 0.1;
+				this.cfg.maxlinewidth = 2;
+				break;
+			case 6:
+				this.cfg.shapeTypes.push(Scribble);
+				this.cfg.minlinewidth = 0.1;
+				this.cfg.maxlinewidth = 2;
+				break;
+			case 7:
+				this.cfg.shapeTypes.push(Line);
+				this.cfg.minlinewidth = 0.1;
+				this.cfg.maxlinewidth = 2;
+				break;
+			case 8:
+				this.cfg.shapeTypes.push(Scribble);
+				this.cfg.shapeTypes.push(Squiggle);
+				this.cfg.shapeTypes.push(Line);
+				this.cfg.minlinewidth = 0.1;
+				this.cfg.maxlinewidth = 2;
 				break;
 		}
 	}
@@ -77,9 +96,12 @@ class Beast {
 		let serializer = new XMLSerializer();
 
 		optimizer.onStep = (step) => {
-			result.drawStep(step);
-			svg.appendChild(step.toSVG());
-			this.cfg.nodes.svgsrc.value = serializer.serializeToString(svg);
+			if (step) {
+				result.drawStep(step);
+				svg.appendChild(step.toSVG());
+				this.cfg.nodes.svgsrc.value = serializer.serializeToString(svg);
+			}
+
 			let stepsremaining = this.cfg.steps - ++steps;
 			var event = new CustomEvent("shape", {'detail': {
 				stepsremaining: stepsremaining
