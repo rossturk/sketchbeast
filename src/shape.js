@@ -174,43 +174,43 @@ export class BentLine extends PointShape {
 	}
 
 	_createPoints(w, h, count) {
-            let first = Shape.randomPoint(w, h);
-            let points = [first];
+		let first = Shape.randomPoint(w, h);
+		let points = [first];
 
-            let direction = Math.random() * 3.6;
-            let radius = (Math.random() * 70) + 15; // between 15 and 115
+		let direction = Math.random() * 2 * Math.PI;
+		let radius = (Math.random() * 70) + 15; // between 15 and 115
 
-            points.push([
-                    first[0] + ~~(radius * Math.cos(direction)),
-                    first[1] + ~~(radius * Math.sin(direction))
-            ]);
+		points.push([
+				first[0] + ~~(radius * Math.cos(direction)),
+				first[1] + ~~(radius * Math.sin(direction))
+		]);
 
-            let turns = [(Math.random() * 1.7) - 0.85]; // between -85 and 85 degrees
-            radius = (Math.random() * 70) + 15; // between 15 and 90
+		let turns = [(Math.random() * 1.7) - 0.85]; // between -85 and 85 degrees
+		radius = (Math.random() * 70) + 15; // between 15 and 90
 
-            points.push([
-                    points[1][0] + ~~(radius * Math.cos(direction + turns[0])),
-                    points[1][1] + ~~(radius * Math.sin(direction + turns[0]))
-            ]);
+		points.push([
+				points[1][0] + ~~(radius * Math.cos(direction + turns[0])),
+				points[1][1] + ~~(radius * Math.sin(direction + turns[0]))
+		]);
 
-            for (let i=1;i<=count-2;i++) {
-                turns[i] = (Math.random() * 0.85) + 0.05; // between 5 and 85 degrees
-                
-                if (turns[i-1] < 0) {
-                    turns[i] = Math.abs(turns[i])
-                } else {
-                    turns[i] = -Math.abs(turns[i])
-                }
+		for (let i=1;i<=count-2;i++) {
+			turns[i] = (Math.random() * 0.85) + 0.05; // between 5 and 85 degrees
+			
+			if (turns[i-1] < 0) {
+				turns[i] = Math.abs(turns[i])
+			} else {
+				turns[i] = -Math.abs(turns[i])
+			}
 
-                radius = (Math.random() * 70) + 15; // between 15 and 115
-                let angle = turns.reduce((a, b) => { return a + b; });
+			radius = (Math.random() * 70) + 15; // between 15 and 115
+			let angle = turns.reduce((a, b) => { return a + b; });
 
-                points.push([
-                        points[i+1][0] + ~~(radius * Math.cos(direction + angle)),
-                        points[i+1][1] + ~~(radius * Math.sin(direction + angle))
-                ]);
-            }
-            return points;
+			points.push([
+					points[i+1][0] + ~~(radius * Math.cos(direction + angle)),
+					points[i+1][1] + ~~(radius * Math.sin(direction + angle))
+			]);
+		}
+		return points;
 	}
 
 	render(ctx) {
@@ -465,6 +465,45 @@ export class Rectangle extends Polygon {
 			[right, bottom],
 			[left, bottom]
 		];
+	}
+}
+
+export class Rhombus extends Polygon {
+	constructor(cfg, w, h) {
+		super(cfg, w, h, 4);
+		this.type = "RotatedRectangle";
+		this.points = this._createPoints(w, h);
+	}
+
+	_createPoints(w, h) {
+		let center = Shape.randomPoint(w, h);
+		let l1 = 10 + (Math.random() * 80);
+		let l2 = l1 + (l1 * ((Math.random() * 0.4) - 0.8));
+		let angle = Math.random() * Math.PI;
+		
+		let points = [];
+
+		points.push([
+			center[0] + ~~(l1 * Math.cos(angle)),
+			center[1] + ~~(l1 * Math.sin(angle))
+		]);
+
+		points.push([
+			center[0] + ~~(l2 * Math.cos(angle + Math.PI / 2)),
+			center[1] + ~~(l2 * Math.sin(angle + Math.PI / 2))
+		]);
+
+		points.push([
+			center[0] + ~~(l1 * Math.cos(angle + Math.PI)),
+			center[1] + ~~(l1 * Math.sin(angle + Math.PI))
+		]);
+
+		points.push([
+			center[0] + ~~(l2 * Math.cos(angle + Math.PI * 1.5)),
+			center[1] + ~~(l2 * Math.sin(angle + Math.PI * 1.5))
+		]);
+
+		return points;
 	}
 }
 

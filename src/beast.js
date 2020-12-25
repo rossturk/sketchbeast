@@ -1,6 +1,6 @@
 import Canvas from "./canvas.js";
 import Optimizer from "./optimizer.js";
-import {Triangle, Rectangle, Ellipse, RandomPolygon, Squiggle, Scribble, Line, BentLine} from "./shape.js";
+import {Triangle, Rectangle, Ellipse, RandomPolygon, Rhombus, Squiggle, Scribble, Line, BentLine} from "./shape.js";
 
 class Beast {
 
@@ -16,6 +16,7 @@ class Beast {
 				this.cfg.shapeTypes.push(Triangle);
 				this.cfg.shapeTypes.push(Rectangle);
 				this.cfg.shapeTypes.push(Ellipse);
+				this.cfg.shapeTypes.push(Rhombus);
 				this.cfg.shapeTypes.push(RandomPolygon);
 				this.cfg.shapeTypes.push(Squiggle);
 				this.cfg.shapeTypes.push(Scribble);
@@ -31,32 +32,35 @@ class Beast {
 				this.cfg.shapeTypes.push(Triangle);
 				break;
 			case 3:
-				this.cfg.shapeTypes.push(Ellipse);
+				this.cfg.shapeTypes.push(Rhombus);
 				break;
 			case 4:
-				this.cfg.shapeTypes.push(RandomPolygon);
+				this.cfg.shapeTypes.push(Ellipse);
 				break;
 			case 5:
+				this.cfg.shapeTypes.push(RandomPolygon);
+				break;
+			case 6:
 				this.cfg.shapeTypes.push(Squiggle);
 				this.cfg.minlinewidth = 0.1;
 				this.cfg.maxlinewidth = 2;
 				break;
-			case 6:
+			case 7:
 				this.cfg.shapeTypes.push(Scribble);
 				this.cfg.minlinewidth = 0.1;
 				this.cfg.maxlinewidth = 2;
 				break;
-			case 7:
+			case 8:
 				this.cfg.shapeTypes.push(Line);
 				this.cfg.minlinewidth = 0.1;
 				this.cfg.maxlinewidth = 2;
 				break;
-			case 8:
+			case 9:
 				this.cfg.shapeTypes.push(BentLine);
 				this.cfg.minlinewidth = 0.1;
 				this.cfg.maxlinewidth = 2;
 				break;
-			case 9:
+			case 10:
 				this.cfg.shapeTypes.push(Scribble);
 				this.cfg.shapeTypes.push(Squiggle);
 				this.cfg.shapeTypes.push(Line);
