@@ -1,7 +1,6 @@
 import Canvas from "./canvas.js";
 import * as util from "./util.js";
 
-/* Shape: a geometric primitive with a bbox */
 export class Shape {
 	static randomPoint(width, height) {
 		return [~~(Math.random()*width), ~~(Math.random()*height)];
@@ -26,7 +25,6 @@ export class Shape {
 
 	toSVG() {}
 
-	/* get a new smaller canvas with this shape */
 	rasterize(alpha) { 
 		let canvas = new Canvas(this.bbox.width, this.bbox.height);
 		let ctx = canvas.ctx;
@@ -75,7 +73,48 @@ export class Shape {
 	render(ctx) {}
 }
 
-export class Line extends Shape {
+class PointShape extends Shape {
+	constructor(cfg, w, h) {
+		super(cfg, w, h);
+	}
+
+	computeBbox() {
+		let min = [
+			this.points.reduce((v, p) => Math.min(v, p[0]), Infinity),
+			this.points.reduce((v, p) => Math.min(v, p[1]), Infinity)
+		];
+		let max = [
+			this.points.reduce((v, p) => Math.max(v, p[0]), -Infinity),
+			this.points.reduce((v, p) => Math.max(v, p[1]), -Infinity)
+		];
+
+		this.bbox = {
+			left: min[0],
+			top: min[1],
+			width: (max[0]-min[0]) || 1, /* fallback for deformed shapes */
+			height: (max[1]-min[1]) || 1
+		};
+
+		return this;
+	}
+
+	mutate(cfg) {
+		let clone = new this.constructor(cfg, 0, 0);
+		clone.points = this.points.map(point => point.slice());
+
+		let index = Math.floor(Math.random() * this.points.length);
+		let point = clone.points[index];
+
+		let angle = Math.random() * 2 * Math.PI;
+		let radius = Math.random() * 20;
+		point[0] += ~~(radius * Math.cos(angle));
+		point[1] += ~~(radius * Math.sin(angle));
+
+		return clone.computeBbox();
+	}
+}
+
+export class Line extends PointShape {
 	constructor(cfg, w, h) {
 		super(cfg, w, h);
 		this.type = "Line";
@@ -123,47 +162,9 @@ export class Line extends Shape {
 		this.addBlur(path);
 		return path;
 	}
-	
-	mutate(cfg) {
-		let clone = new this.constructor(cfg, 0, 0);
-		clone.points = this.points.map(point => point.slice());
-
-		let index = Math.floor(Math.random() * this.points.length);
-		let point = clone.points[index];
-
-		let angle = Math.random() * 2 * Math.PI;
-		let radius = Math.random() * 9;
-		point[0] += ~~(radius * Math.cos(angle));
-		point[1] += ~~(radius * Math.sin(angle));
-
-		return clone.computeBbox();
-	}
-
-	computeBbox() {
-		let min = [
-			this.points.reduce((v, p) => Math.min(v, p[0]), Infinity),
-			this.points.reduce((v, p) => Math.min(v, p[1]), Infinity)
-		];
-		let max = [
-			this.points.reduce((v, p) => Math.max(v, p[0]), -Infinity),
-			this.points.reduce((v, p) => Math.max(v, p[1]), -Infinity)
-		];
-
-		this.bbox = {
-			left: min[0],
-			top: min[1],
-			width: (max[0]-min[0]),
-			height: (max[1]-min[1])
-		};
-
-		if (this.bbox.width < 1) { this.bbox.width = 1;}
-		if (this.bbox.height < 1) { this.bbox.height = 1;}
-
-		return this;
-	}
 }
 
-export class BentLine extends Shape {
+export class BentLine extends PointShape {
 	constructor(cfg, w, h) {
 		super(cfg, w, h);
 		this.type = "BentLine";
@@ -239,47 +240,9 @@ export class BentLine extends Shape {
 		this.addBlur(path);
 		return path;
 	}
-	
-	mutate(cfg) {
-		let clone = new this.constructor(cfg, 0, 0);
-		clone.points = this.points.map(point => point.slice());
-
-		let index = Math.floor(Math.random() * this.points.length);
-		let point = clone.points[index];
-
-		let angle = Math.random() * 2 * Math.PI;
-		let radius = Math.random() * 9;
-		point[0] += ~~(radius * Math.cos(angle));
-		point[1] += ~~(radius * Math.sin(angle));
-
-		return clone.computeBbox();
-	}
-
-	computeBbox() {
-		let min = [
-			this.points.reduce((v, p) => Math.min(v, p[0]), Infinity),
-			this.points.reduce((v, p) => Math.min(v, p[1]), Infinity)
-		];
-		let max = [
-			this.points.reduce((v, p) => Math.max(v, p[0]), -Infinity),
-			this.points.reduce((v, p) => Math.max(v, p[1]), -Infinity)
-		];
-
-		this.bbox = {
-			left: min[0],
-			top: min[1],
-			width: (max[0]-min[0]),
-			height: (max[1]-min[1])
-		};
-
-		if (this.bbox.width < 1) { this.bbox.width = 1;}
-		if (this.bbox.height < 1) { this.bbox.height = 1;}
-
-		return this;
-	}
 }
 
-export class Scribble extends Shape {
+export class Scribble extends PointShape {
 	constructor(cfg, w, h) {
 		super(cfg, w, h);
 		this.type = "Scribble";
@@ -331,47 +294,9 @@ export class Scribble extends Shape {
 		this.addBlur(path);
 		return path;
 	}
-	
-	mutate(cfg) {
-		let clone = new this.constructor(cfg, 0, 0);
-		clone.points = this.points.map(point => point.slice());
-
-		let index = Math.floor(Math.random() * this.points.length);
-		let point = clone.points[index];
-
-		let angle = Math.random() * 2 * Math.PI;
-		let radius = Math.random() * 9;
-		point[0] += ~~(radius * Math.cos(angle));
-		point[1] += ~~(radius * Math.sin(angle));
-
-		return clone.computeBbox();
-	}
-
-	computeBbox() {
-		let min = [
-			this.points.reduce((v, p) => Math.min(v, p[0]), Infinity),
-			this.points.reduce((v, p) => Math.min(v, p[1]), Infinity)
-		];
-		let max = [
-			this.points.reduce((v, p) => Math.max(v, p[0]), -Infinity),
-			this.points.reduce((v, p) => Math.max(v, p[1]), -Infinity)
-		];
-
-		this.bbox = {
-			left: min[0],
-			top: min[1],
-			width: (max[0]-min[0]),
-			height: (max[1]-min[1])
-		};
-
-		if (this.bbox.width < 1) { this.bbox.width = 1;}
-		if (this.bbox.height < 1) { this.bbox.height = 1;}
-
-		return this;
-	}
 }
 
-export class Squiggle extends Shape {
+export class Squiggle extends PointShape {
 	constructor(cfg, w, h) {
 		super(cfg, w, h);
 		this.type = "Squiggle";
@@ -424,48 +349,9 @@ export class Squiggle extends Shape {
 		this.addBlur(path);
 		return path;
 	}
-	
-	mutate(cfg) {
-		let clone = new this.constructor(cfg, 0, 0);
-		clone.points = this.points.map(point => point.slice());
-
-		let index = Math.floor(Math.random() * this.points.length);
-		let point = clone.points[index];
-
-		let angle = Math.random() * 2 * Math.PI;
-		let radius = Math.random() * 20;
-		point[0] += ~~(radius * Math.cos(angle));
-		point[1] += ~~(radius * Math.sin(angle));
-
-		return clone.computeBbox();
-	}
-
-	computeBbox() {
-		let min = [
-			this.points.reduce((v, p) => Math.min(v, p[0]), Infinity),
-			this.points.reduce((v, p) => Math.min(v, p[1]), Infinity)
-		];
-		let max = [
-			this.points.reduce((v, p) => Math.max(v, p[0]), -Infinity),
-			this.points.reduce((v, p) => Math.max(v, p[1]), -Infinity)
-		];
-
-		this.bbox = {
-			left: min[0],
-			top: min[1],
-			width: (max[0]-min[0]),
-			height: (max[1]-min[1])
-		};
-
-		if (this.bbox.width < 1) { this.bbox.width = 1;}
-		if (this.bbox.height < 1) { this.bbox.height = 1;}
-
-		return this;
-	}
-
 }
 
-class Polygon extends Shape {
+class Polygon extends PointShape {
 	constructor(cfg, w, h, count) {
 		super(cfg, w, h);
 		this.type = "Polygon";
@@ -498,41 +384,6 @@ class Polygon extends Shape {
 		path.setAttribute("fill-opacity", this.alpha);
 		this.addBlur(path);
 		return path;
-	}
-
-	mutate(cfg) {
-		let clone = new this.constructor(cfg, 0, 0);
-		clone.points = this.points.map(point => point.slice());
-
-		let index = Math.floor(Math.random() * this.points.length);
-		let point = clone.points[index];
-
-		let angle = Math.random() * 2 * Math.PI;
-		let radius = Math.random() * 20;
-		point[0] += ~~(radius * Math.cos(angle));
-		point[1] += ~~(radius * Math.sin(angle));
-
-		return clone.computeBbox();
-	}
-
-	computeBbox() {
-		let min = [
-			this.points.reduce((v, p) => Math.min(v, p[0]), Infinity),
-			this.points.reduce((v, p) => Math.min(v, p[1]), Infinity)
-		];
-		let max = [
-			this.points.reduce((v, p) => Math.max(v, p[0]), -Infinity),
-			this.points.reduce((v, p) => Math.max(v, p[1]), -Infinity)
-		];
-
-		this.bbox = {
-			left: min[0],
-			top: min[1],
-			width: (max[0]-min[0]) || 1, /* fallback for deformed shapes */
-			height: (max[1]-min[1]) || 1
-		};
-
-		return this;
 	}
 
 	_createPoints(w, h, count) {
@@ -621,17 +472,16 @@ export class Ellipse extends Shape {
 	constructor(cfg, w, h) {
 		super(cfg, w, h);
 		this.type = "Ellipse";
-
 		this.center = Shape.randomPoint(w, h);
 		this.rx = 1 + ~~(Math.random() * 20);
 		this.ry = 1 + ~~(Math.random() * 20);
-
+		this.rot = (Math.random() * Math.PI / 2);
 		this.computeBbox();
 	}
 
 	render(ctx) {
 		ctx.beginPath();
-		ctx.ellipse(this.center[0], this.center[1], this.rx, this.ry, 0, 0, 2*Math.PI, false);
+		ctx.ellipse(this.center[0], this.center[1], this.rx, this.ry, this.rot, 0, 2*Math.PI, false);
 		ctx.fillStyle = this.color;
 		ctx.fill();
 	}
@@ -644,6 +494,7 @@ export class Ellipse extends Shape {
 		node.setAttribute("ry", this.ry);
 		node.setAttribute("fill", this.color);
 		node.setAttribute("fill-opacity", this.alpha);
+		node.setAttribute("transform", "rotate("+ (this.rot * (180/Math.PI)) +","+ this.center[0] +","+ this.center[1]+ ")");
 		this.addBlur(node);
 		return node;
 	}
@@ -677,11 +528,12 @@ export class Ellipse extends Shape {
 	}
 
 	computeBbox() {
+		let rmax = Math.max(this.rx, this.ry);
 		this.bbox = {
-			left: this.center[0] - this.rx,
-			top: this.center[1] - this.ry,
-			width: 2*this.rx,
-			height: 2*this.ry
+			left: this.center[0] - rmax,
+			top: this.center[1] - rmax,
+			width: 2*rmax,
+			height: 2*rmax
 		}
 		return this;
 	}
