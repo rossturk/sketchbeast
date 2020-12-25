@@ -106,7 +106,7 @@ class PointShape extends Shape {
 		let point = clone.points[index];
 
 		let angle = Math.random() * 2 * Math.PI;
-		let radius = Math.random() * 20;
+		let radius = Math.random() * 10;
 		point[0] += ~~(radius * Math.cos(angle));
 		point[1] += ~~(radius * Math.sin(angle));
 
@@ -471,13 +471,13 @@ export class Rectangle extends Polygon {
 export class Rhombus extends Polygon {
 	constructor(cfg, w, h) {
 		super(cfg, w, h, 4);
-		this.type = "RotatedRectangle";
+		this.type = "Rhombus";
 		this.points = this._createPoints(w, h);
 	}
 
 	_createPoints(w, h) {
 		let center = Shape.randomPoint(w, h);
-		let l1 = 10 + (Math.random() * 80);
+		let l1 = 1 + (Math.random() * 75);
 		let l2 = l1 + (l1 * ((Math.random() * 0.4) - 0.8));
 		let angle = Math.random() * Math.PI;
 		
