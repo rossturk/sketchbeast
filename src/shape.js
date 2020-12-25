@@ -163,6 +163,122 @@ export class Line extends Shape {
 	}
 }
 
+export class BentLine extends Shape {
+	constructor(cfg, w, h) {
+		super(cfg, w, h);
+		this.type = "BentLine";
+		this.points = this._createPoints(w, h, 6);
+		this.linewidth = (Math.random() * (this.cfg.maxlinewidth - this.cfg.minlinewidth)) + this.cfg.minlinewidth;
+		this.computeBbox();
+	}
+
+	_createPoints(w, h, count) {
+            let first = Shape.randomPoint(w, h);
+            let points = [first];
+
+            let direction = Math.random() * 3.6;
+            let radius = (Math.random() * 70) + 15; // between 15 and 115
+
+            points.push([
+                    first[0] + ~~(radius * Math.cos(direction)),
+                    first[1] + ~~(radius * Math.sin(direction))
+            ]);
+
+            let turns = [(Math.random() * 1.7) - 0.85]; // between -85 and 85 degrees
+            radius = (Math.random() * 70) + 15; // between 15 and 90
+
+            points.push([
+                    points[1][0] + ~~(radius * Math.cos(direction + turns[0])),
+                    points[1][1] + ~~(radius * Math.sin(direction + turns[0]))
+            ]);
+
+            for (let i=1;i<=count-2;i++) {
+                turns[i] = (Math.random() * 0.85) + 0.05; // between 5 and 85 degrees
+                
+                if (turns[i-1] < 0) {
+                    turns[i] = Math.abs(turns[i])
+                } else {
+                    turns[i] = -Math.abs(turns[i])
+                }
+
+                radius = (Math.random() * 70) + 15; // between 15 and 115
+                let angle = turns.reduce((a, b) => { return a + b; });
+
+                points.push([
+                        points[i+1][0] + ~~(radius * Math.cos(direction + angle)),
+                        points[i+1][1] + ~~(radius * Math.sin(direction + angle))
+                ]);
+            }
+            return points;
+	}
+
+	render(ctx) {
+		ctx.beginPath();
+		ctx.lineCap = 'round';
+		this.points.forEach(([x, y], index) => {
+			if (index) {
+				ctx.lineTo(x, y);
+			} else {
+				ctx.moveTo(x, y);
+			}
+		});
+		ctx.stroke();
+	}
+
+	toSVG() {
+		let path = document.createElementNS(util.SVGNS, "path");
+		let d = this.points.map((point, index) => {
+			let cmd = (index ? "L" : "M");
+			return `${cmd}${point.join(",")}`;
+		}).join("");
+		path.setAttribute("d", d);
+		path.setAttribute("stroke", this.color);
+		path.setAttribute("stroke-width", this.linewidth);
+		path.setAttribute("fill", "none");
+		path.setAttribute("stroke-linecap", "round");
+		this.addBlur(path);
+		return path;
+	}
+	
+	mutate(cfg) {
+		let clone = new this.constructor(cfg, 0, 0);
+		clone.points = this.points.map(point => point.slice());
+
+		let index = Math.floor(Math.random() * this.points.length);
+		let point = clone.points[index];
+
+		let angle = Math.random() * 2 * Math.PI;
+		let radius = Math.random() * 9;
+		point[0] += ~~(radius * Math.cos(angle));
+		point[1] += ~~(radius * Math.sin(angle));
+
+		return clone.computeBbox();
+	}
+
+	computeBbox() {
+		let min = [
+			this.points.reduce((v, p) => Math.min(v, p[0]), Infinity),
+			this.points.reduce((v, p) => Math.min(v, p[1]), Infinity)
+		];
+		let max = [
+			this.points.reduce((v, p) => Math.max(v, p[0]), -Infinity),
+			this.points.reduce((v, p) => Math.max(v, p[1]), -Infinity)
+		];
+
+		this.bbox = {
+			left: min[0],
+			top: min[1],
+			width: (max[0]-min[0]),
+			height: (max[1]-min[1])
+		};
+
+		if (this.bbox.width < 1) { this.bbox.width = 1;}
+		if (this.bbox.height < 1) { this.bbox.height = 1;}
+
+		return this;
+	}
+}
+
 export class Scribble extends Shape {
 	constructor(cfg, w, h) {
 		super(cfg, w, h);
@@ -568,16 +684,5 @@ export class Ellipse extends Shape {
 			height: 2*this.ry
 		}
 		return this;
-	}
-}
-
-export class Debug extends Shape {
-	constructor(cfg, w, h) {
-		super(cfg, w, h);
-		this.bbox = {left: 0, top: 0, width:w, height: h};
-	}
-
-	render(ctx) {
-		ctx.fillRect(0, 0, 1.5, 1.5);
 	}
 }
