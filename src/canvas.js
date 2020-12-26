@@ -103,7 +103,6 @@ export default class Canvas {
 			}
 			img.onerror = e => {
 				console.error(e);
-				alert("The image URL cannot be loaded. Does the server support CORS?");
 			}
 		});
 	}
