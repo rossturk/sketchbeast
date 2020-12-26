@@ -1,6 +1,4 @@
-CFKEY=`cat cloudflare.key`
-
-cfkey := $(shell cat cloudflare.key)
+cfkey := $(shell cat ~/.cfkey)
 
 all:
 	rollup -c
