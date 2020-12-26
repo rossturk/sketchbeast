@@ -6,7 +6,7 @@ export class Shape {
 		return [~~(Math.random()*width), ~~(Math.random()*height)];
 	}
 
-	static create(cfg) {
+	static create(cfg) { // this is where we can program sequences, gotta figure out how to determune step number in this scope
 		let ctors = cfg.shapeTypes;
 		let index = Math.floor(Math.random() * ctors.length);
 		let ctor = ctors[index];
