@@ -468,14 +468,73 @@ export class Rectangle extends Polygon {
 	}
 }
 
+export class RotatedRectangle extends Polygon {
+	constructor(cfg, w, h) {
+		super(cfg, w, h, 4);
+		this.type = "RotatedRectangle";
+	}
+
+	_createPoints(w, h) {
+		this.center = Shape.randomPoint(w, h);
+		this.sizex = 1 + Math.random() * 300;
+		this.sizey = 1 + Math.random() * 300;
+		this.angle = Math.random() * Math.PI;
+		let points = this._createRectPoints(this.center,this.sizex,this.sizey,this.angle);	
+		return points;
+	}
+
+	_createRectPoints(center,w,h,angle) {
+		let sinAng = Math.sin(angle)	
+		let cosAng = Math.cos(angle)
+
+		let upDiff = sinAng * w;
+		let sideDiff = cosAng * w;
+	
+		let points = [center];
+
+		// todo: determine correct x/y from the center
+		points.push([~~(center[0] + sideDiff), ~~(center[1] + upDiff)]);
+	
+		upDiff = cosAng * h;
+		sideDiff = sinAng * h;
+	
+		points.push([~~(points[1][0] + sideDiff), ~~(points[1][1] - upDiff)]);
+		points.push([~~(center[0] + sideDiff), ~~(center[1] - upDiff)]);
+
+		return points;
+	}
+
+	mutate(cfg) {
+		let clone = new this.constructor(0, 0);
+		clone.angle = this.angle;
+		clone.sizex = this.sizex;
+		clone.sizey = this.sizey;
+		clone.center = this.center;
+
+		switch (Math.floor(Math.random()*3)) {
+			case 0: /* rotate */
+				clone.angle += (Math.random() * 0.60) - 0.30; // -0.3 to 0.3
+				break;
+			case 1: /* scale x */
+				clone.sizex *= (Math.random() * 0.4) + 0.8; // 0.8 to 1.2
+				break;
+			case 2: /* scale y */
+				clone.sizey *= (Math.random() * 0.4) + 0.8; // 0.8 to 1.2
+				break;
+		}
+
+		clone.points = this._createRectPoints(this.center,clone.sizex,clone.sizey,clone.angle);
+		return clone.computeBbox();
+	}
+}
+
 export class Rhombus extends Polygon {
 	constructor(cfg, w, h) {
 		super(cfg, w, h, 4);
 		this.type = "Rhombus";
-		this.points = this._createPoints(w, h);
 	}
 
-	_createPoints(w, h) {
+	_createPoints(w, h, count) {
 		let center = Shape.randomPoint(w, h);
 		let l1 = 1 + (Math.random() * 75);
 		let l2 = l1 + (l1 * ((Math.random() * 0.4) - 0.8));
