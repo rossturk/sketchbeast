@@ -68,6 +68,9 @@ export class Shape {
 class PointShape extends Shape {
 	constructor(cfg, w, h) {
 		super(cfg, w, h);
+		this.points = this._createPoints(w, h);
+		this.linewidth = (Math.random() * (this.cfg.maxlinewidth - this.cfg.minlinewidth)) + this.cfg.minlinewidth;
+		this.computeBbox();
 	}
 
 	computeBbox() {
@@ -110,9 +113,6 @@ export class Line extends PointShape {
 	constructor(cfg, w, h) {
 		super(cfg, w, h);
 		this.type = "Line";
-		this.points = this._createPoints(w, h);
-		this.linewidth = (Math.random() * (this.cfg.maxlinewidth - this.cfg.minlinewidth)) + this.cfg.minlinewidth;
-		this.computeBbox();
 	}
 
 	_createPoints(w, h) {
@@ -166,9 +166,6 @@ export class BentLine extends PointShape {
 	constructor(cfg, w, h) {
 		super(cfg, w, h);
 		this.type = "BentLine";
-		this.points = this._createPoints(w, h, 6);
-		this.linewidth = (Math.random() * (this.cfg.maxlinewidth - this.cfg.minlinewidth)) + this.cfg.minlinewidth;
-		this.computeBbox();
 	}
 
 	_createPoints(w, h, count) {
@@ -250,9 +247,6 @@ export class Scribble extends PointShape {
 	constructor(cfg, w, h) {
 		super(cfg, w, h);
 		this.type = "Scribble";
-		this.points = this._createPoints(w, h);
-		this.linewidth = (Math.random() * (this.cfg.maxlinewidth - this.cfg.minlinewidth)) + this.cfg.minlinewidth;
-		this.computeBbox();
 	}
 
 	_createPoints(w, h) {
@@ -310,9 +304,6 @@ export class Squiggle extends PointShape {
 	constructor(cfg, w, h) {
 		super(cfg, w, h);
 		this.type = "Squiggle";
-		this.points = this._createPoints(w, h);
-		this.linewidth = (Math.random() * (this.cfg.maxlinewidth - this.cfg.minlinewidth)) + this.cfg.minlinewidth;
-		this.computeBbox();
 	}
 
 	_createPoints(w, h) {
