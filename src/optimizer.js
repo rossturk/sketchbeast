@@ -4,9 +4,9 @@ import Canvas from "./canvas.js";
 import {Shape} from "./shape.js";
 
 export default class Optimizer {
-	constructor(original, cfg) {
+	constructor(original, current, cfg) {
 		this.cfg = cfg;
-		this.state = new State(original, Canvas.empty(cfg));
+		this.state = new State(original, current);
 		this._steps = 0;
 		this.onStep = () => {};
 		// console.log("initial distance %s", this.state.distance);
