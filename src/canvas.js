@@ -62,7 +62,7 @@ export default class Canvas {
 			rect.setAttribute("fill", cfg.fill);
 			node.appendChild(rect);
 
-			['0.2', '0.6', '1'].forEach(function(item){
+			['0.2', '0.4', '0.6', '0.8', '1'].forEach(function(item){
 				let fe = document.createElementNS(util.SVGNS, "feGaussianBlur");
 				fe.setAttribute("stdDeviation", item);
 				let filter = document.createElementNS(util.SVGNS, "filter");

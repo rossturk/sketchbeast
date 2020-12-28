@@ -35,39 +35,31 @@ export class Shape {
 		return canvas;
 	}
 
-	addBlur(element) {
-		switch (this.cfg.blur) {
-			case 0:
-				break;
+	getBlur(blur) {
+		switch (blur) {
 			case 1:
 				if (Math.floor(Math.random() * 2) == 1) {
 					switch (Math.floor(Math.random()*3)) {
 						case 0:
-							element.setAttribute("filter", "url(#g0.6)");
-							break;
+							return "url(#g0.6)";
 						case 1:
-							element.setAttribute("filter", "url(#g0.2)");
-							break;
+							return "url(#g0.2)";
 						case 2:
-							element.setAttribute("filter", "url(#g1)");
-							break;
+							return "url(#g1)";
 					}	
 				}
-				break;
+				return;
 			case 2:
 				switch (Math.floor(Math.random()*3)) {
 					case 0:
-						element.setAttribute("filter", "url(#g0.6)");
-						break;
+						return "url(#g0.8)";
 					case 1:
-						element.setAttribute("filter", "url(#g0.2)");
-						break;
+						return "url(#g0.4)";
 					case 2:
-						element.setAttribute("filter", "url(#g1)");
-						break;
+						return "url(#g1)";
 				}	
-				break;
 		}
+		return;
 	}
 
 	render(ctx) {}
@@ -159,7 +151,13 @@ export class Line extends PointShape {
 		path.setAttribute("stroke-width", this.linewidth);
 		path.setAttribute("fill", "none");
 		path.setAttribute("stroke-linecap", "round");
-		this.addBlur(path);
+		
+		let blur = this.getBlur(this.cfg.blur);
+
+		if (blur) {
+			path.setAttribute("filter", blur);
+		}
+
 		return path;
 	}
 }
@@ -237,7 +235,13 @@ export class BentLine extends PointShape {
 		path.setAttribute("stroke-width", this.linewidth);
 		path.setAttribute("fill", "none");
 		path.setAttribute("stroke-linecap", "round");
-		this.addBlur(path);
+
+		let blur = this.getBlur(this.cfg.blur);
+
+		if (blur) {
+			path.setAttribute("filter", blur);
+		}
+
 		return path;
 	}
 }
@@ -291,7 +295,13 @@ export class Scribble extends PointShape {
 		path.setAttribute("stroke-width", this.linewidth);
 		path.setAttribute("fill", "none");
 		path.setAttribute("stroke-linecap", "round");
-		this.addBlur(path);
+
+		let blur = this.getBlur(this.cfg.blur);
+
+		if (blur) {
+			path.setAttribute("filter", blur);
+		}
+		
 		return path;
 	}
 }
@@ -346,7 +356,13 @@ export class Squiggle extends PointShape {
 		path.setAttribute("stroke-width", this.linewidth);
 		path.setAttribute("fill", "none");
 		path.setAttribute("stroke-linecap", "round");
-		this.addBlur(path);
+
+		let blur = this.getBlur(this.cfg.blur);
+
+		if (blur) {
+			path.setAttribute("filter", blur);
+		}
+
 		return path;
 	}
 }
@@ -382,7 +398,13 @@ class Polygon extends PointShape {
 		path.setAttribute("d", `${d}Z`);
 		path.setAttribute("fill", this.color);
 		path.setAttribute("fill-opacity", this.alpha);
-		this.addBlur(path);
+
+		let blur = this.getBlur(this.cfg.blur);
+
+		if (blur) {
+			path.setAttribute("filter", blur);
+		}
+
 		return path;
 	}
 
@@ -402,13 +424,6 @@ class Polygon extends PointShape {
 	}
 }
 
-export class RandomPolygon extends Polygon {
-	constructor(cfg, w,h) {
-		super(cfg, w, h, Math.floor(Math.random()*4)+4);
-		this.type = "RandomPolygon";
-	}
-}
-
 export class Triangle extends Polygon {
 	constructor(cfg, w, h) {
 		super(cfg, w, h, 3);
@@ -423,7 +438,7 @@ export class Rectangle extends Polygon {
 	}
 
 	mutate(cfg) {
-		let clone = new this.constructor(0, 0);
+		let clone = new this.constructor(cfg, 0, 0);
 		clone.points = this.points.map(point => point.slice());
 
 		let amount = ~~((Math.random()-0.5) * 20);
@@ -505,7 +520,7 @@ export class RotatedRectangle extends Polygon {
 	}
 
 	mutate(cfg) {
-		let clone = new this.constructor(0, 0);
+		let clone = new this.constructor(cfg, 0, 0);
 		clone.angle = this.angle;
 		clone.sizex = this.sizex;
 		clone.sizey = this.sizey;
@@ -528,7 +543,7 @@ export class RotatedRectangle extends Polygon {
 	}
 }
 
-export class Rhombus extends Polygon {
+export class Quadrilateral extends Polygon {
 	constructor(cfg, w, h) {
 		super(cfg, w, h, 4);
 		this.type = "Rhombus";
@@ -593,12 +608,18 @@ export class Ellipse extends Shape {
 		node.setAttribute("fill", this.color);
 		node.setAttribute("fill-opacity", this.alpha);
 		node.setAttribute("transform", "rotate("+ (this.rot * (180/Math.PI)) +","+ this.center[0] +","+ this.center[1]+ ")");
-		this.addBlur(node);
+
+		let blur = this.getBlur(this.cfg.blur);
+
+		if (blur) {
+			node.setAttribute("filter", blur);
+		}
+
 		return node;
 	}
 
 	mutate(cfg) {
-		let clone = new this.constructor(0, 0);
+		let clone = new this.constructor(cfg, 0, 0);
 		clone.center = this.center.slice();
 		clone.rx = this.rx;
 		clone.ry = this.ry;
