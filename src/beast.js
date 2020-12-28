@@ -1,6 +1,6 @@
 import Canvas from "./canvas.js";
 import Optimizer from "./optimizer.js";
-import {Triangle, Rectangle, RotatedRectangle, Ellipse, Rhombus, Squiggle, Scribble, Line, BentLine} from "./shape.js";
+import {Triangle, Rectangle, RotatedRectangle, Ellipse, Quadrilateral, Squiggle, Scribble, Line, BentLine} from "./shape.js";
 
 class Beast {
 	configure(config) {
@@ -16,7 +16,7 @@ class Beast {
 				this.cfg.shapeTypes.push(RotatedRectangle);
 				this.cfg.shapeTypes.push(Rectangle);
 				this.cfg.shapeTypes.push(Ellipse);
-				this.cfg.shapeTypes.push(Rhombus);
+				this.cfg.shapeTypes.push(Quadrilateral);
 				break;
 			case 1:
 				this.cfg.shapeTypes.push(RotatedRectangle);
@@ -25,7 +25,7 @@ class Beast {
 				this.cfg.shapeTypes.push(Triangle);
 				break;
 			case 3:
-				this.cfg.shapeTypes.push(Rhombus);
+				this.cfg.shapeTypes.push(Quadrilateral);
 				break;
 			case 4:
 				this.cfg.shapeTypes.push(Ellipse);
