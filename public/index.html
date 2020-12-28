@@ -24,11 +24,17 @@
               <span class="clause"><span class="beforetext">to make a</span><span class="duringtext">is making a</span>
               <select name="blur" id="blur">
                 <option value="0">crystal clear</option>
-                <option value="1" selected>dreamy</option>
-                <option value="2">blurry</option>
+                <option value="1" selected>pleasing</option>
+                <option value="2">dreamy</option>
               </select>
-              collage</span><br /> <span class="clause"> of
-              <span class="beforetext"><input type="number" id="count" min="3" max="150" value="15"></span>
+              collage</span><br /> <span class="clause"> with
+              <span class="beforetext">
+                <select name="count" id="count">
+                    <option value="5">a few</option>
+                    <option value="30" selected>a bunch of</option>
+                    <option value="150">too many</option>
+                  </select>    
+              </span>
               <span class="duringtext" id="currentcount">some</span> semi-random
                 <select name="mode" id="mode">
                   <option value="0">mixed shapes</option>
@@ -38,7 +44,6 @@
                   <option value="4">ellipses</option>
                   <option value="5">mixed lines</option>
                   <option value="6">squiggles</option>
-                  <option value="7">scribbles</option>
                   <option value="8">lines</option>
                   <option value="9">bent lines</option>
                 </select>
@@ -121,6 +126,8 @@ function process(file){
     var steps = document.getElementById('count').value;
     var mode = document.getElementById('mode').value;
     var blur = document.getElementById('blur').value;
+
+    steps *= ~~(Math.random()*0.4) + 0.8;
 
     beast.configure({
         viewHeight: $("#workpane").height(),
@@ -206,19 +213,6 @@ $(document).ready(function () {
         }
     }, false);
     
-    document.getElementById('count').addEventListener('change', function () {
-        if (this.value > 150) { this.value = 150; this.style.width = '113px'; }
-        if (this.value < 3) { this.value = 3; this.style.width = '96px'; }
-    }, false);
-    
-    document.getElementById('count').addEventListener('input', function () {  
-        if (this.value.length == 0) { this.style.width = '51px'}  
-        if (this.value.length == 1) { this.style.width = '77px'}  
-        if (this.value.length == 2) { this.style.width = '96px'}  
-        if (this.value.length == 3) { this.style.width = '113px'}  
-        if (this.value.length > 3) { this.value = 150; this.style.width = '113px'}
-    }, false);
-
     $(window).resize(function() {
         updateImageSize();
     });

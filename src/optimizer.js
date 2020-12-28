@@ -34,7 +34,7 @@ export default class Optimizer {
 
 	_continue() {
 		if (this._steps < this.cfg.steps) {
-			setTimeout(() => this._addShape(), 10);
+			setTimeout(() => this._addShape(), 1);
 		} else {
 			let time = Date.now() - this._ts;
 			console.log("finished in %s", time);

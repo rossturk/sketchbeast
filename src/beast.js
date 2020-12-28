@@ -31,32 +31,31 @@ class Beast {
 				this.cfg.shapeTypes.push(Ellipse);
                 break;
             case 5:
-                this.cfg.shapeTypes.push(Scribble);
                 this.cfg.shapeTypes.push(Squiggle);
                 this.cfg.shapeTypes.push(Line);
                 this.cfg.shapeTypes.push(BentLine);
                 this.cfg.minlinewidth = 0.1;
-                this.cfg.maxlinewidth = 2;
+                this.cfg.maxlinewidth = 1;
                 break;
 			case 6:
 				this.cfg.shapeTypes.push(Squiggle);
 				this.cfg.minlinewidth = 0.1;
-				this.cfg.maxlinewidth = 2;
+				this.cfg.maxlinewidth = 1;
 				break;
 			case 7:
 				this.cfg.shapeTypes.push(Scribble);
 				this.cfg.minlinewidth = 0.1;
-				this.cfg.maxlinewidth = 2;
+				this.cfg.maxlinewidth = 1;
 				break;
 			case 8:
 				this.cfg.shapeTypes.push(Line);
 				this.cfg.minlinewidth = 0.1;
-				this.cfg.maxlinewidth = 2;
+				this.cfg.maxlinewidth = 1;
 				break;
 			case 9:
 				this.cfg.shapeTypes.push(BentLine);
 				this.cfg.minlinewidth = 0.1;
-				this.cfg.maxlinewidth = 2;
+				this.cfg.maxlinewidth = 1;
 				break;
 		}
 	}

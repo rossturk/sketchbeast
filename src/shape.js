@@ -38,25 +38,25 @@ export class Shape {
 	getBlur(blur) {
 		switch (blur) {
 			case 1:
-				if (Math.floor(Math.random() * 2) == 1) {
+				if (Math.floor(Math.random() * 2) == 1) { // pleasing
 					switch (Math.floor(Math.random()*3)) {
 						case 0:
 							return "url(#g0.6)";
 						case 1:
-							return "url(#g0.2)";
+							return "";
 						case 2:
 							return "url(#g1)";
 					}	
 				}
 				return;
 			case 2:
-				switch (Math.floor(Math.random()*3)) {
+				switch (Math.floor(Math.random()*3)) { // dreamy
 					case 0:
-						return "url(#g0.8)";
+						return "";
 					case 1:
-						return "url(#g0.4)";
-					case 2:
 						return "url(#g1)";
+					case 2:
+						return "url(#g10)";
 				}	
 		}
 		return;
