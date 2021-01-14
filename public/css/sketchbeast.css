@@ -118,3 +118,19 @@ input[type=number] {
 .download button:hover {
     color: #fff;
 }
+
+#copyright {
+    background-color: #000;
+}
+
+#copyright p {
+    color: #666;
+    font-size: small;
+    margin: 0 auto;
+    margin-bottom: 5px;
+    margin-top: 5px;
+}
+
+#copyright a {
+    color: #2a6d83;
+}
