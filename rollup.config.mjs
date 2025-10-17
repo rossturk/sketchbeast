@@ -1,4 +1,4 @@
-import { terser } from "rollup-plugin-terser";
+import terser from "@rollup/plugin-terser";
 import { mkdirSync } from "fs";
 
 // Ensure output directory exists
