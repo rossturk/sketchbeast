@@ -4,7 +4,7 @@
   },
   "dependencies": {
     "rollup": "^3.5.1",
-    "rollup-plugin-terser": "^7.0.2"
+    "@rollup/plugin-terser": "^0.4.4"
   },
   "name": "Sketchbeast",
   "version": "1.0.0",
