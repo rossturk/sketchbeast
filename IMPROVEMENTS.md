@@ -371,7 +371,6 @@ beast.configure({
 
 ## Credits
 
-Original Sketchbeast by Ross Turk
 v2.0 Improvements: 2025
 
 ## License
