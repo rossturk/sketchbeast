@@ -1,12 +1,26 @@
-import { terser } from "rollup-plugin-terser";
+import terser from "@rollup/plugin-terser";
 
-export default {
-  input: 'src/beast.js',
-  plugins: [terser()],
-  output: {
-    file: 'public/js/beast.js',
-    name: 'Beast',
-    format: 'umd'
+export default [
+  // Main bundle
+  {
+    input: 'src/beast.js',
+    plugins: [terser()],
+    output: {
+      file: 'public/js/beast.js',
+      name: 'Beast',
+      format: 'umd',
+      sourcemap: true
+    }
+  },
+  // Worker bundle
+  {
+    input: 'src/worker.js',
+    plugins: [terser()],
+    output: {
+      file: 'public/js/worker.js',
+      format: 'iife',
+      sourcemap: true
+    }
   }
-};
+];
 

@@ -1,15 +1,26 @@
 {
   "scripts": {
-    "build": "rollup -c"
+    "build": "rollup -c",
+    "dev": "rollup -c -w",
+    "serve": "python3 -m http.server 8000 --directory public"
   },
   "dependencies": {
     "rollup": "^3.5.1",
-    "rollup-plugin-terser": "^7.0.2"
+    "@rollup/plugin-terser": "^0.4.4"
   },
   "name": "Sketchbeast",
-  "version": "1.0.0",
-  "main": "index.js",
+  "version": "2.0.0",
+  "description": "Turn photos into artistic collages using geometric shapes",
+  "main": "public/js/beast.js",
   "repository": "git@github.com:rossturk/sketchbeast.git",
   "author": "Ross Turk <ross@rossturk.com>",
-  "license": "MIT"
+  "license": "MIT",
+  "keywords": [
+    "image-processing",
+    "art",
+    "svg",
+    "geometric",
+    "canvas",
+    "webworkers"
+  ]
 }
