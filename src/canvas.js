@@ -82,27 +82,39 @@ export default class Canvas {
 			return Promise.resolve(this.test(cfg));
 		}
 
-		return new Promise(resolve => {
+		return new Promise((resolve, reject) => {
 			let img = new Image();
 			img.crossOrigin = true;
 			img.src = url;
+
 			img.onload = e => {
-				cfg.naturalWidth = img.naturalWidth;
-				cfg.naturalHeight = img.naturalHeight;
+				try {
+					cfg.naturalWidth = img.naturalWidth;
+					cfg.naturalHeight = img.naturalHeight;
 
-				cfg.computeScale = getScale(cfg.naturalWidth, cfg.naturalHeight, cfg.computeSize);
-				cfg.width = cfg.naturalWidth / cfg.computeScale;
-				cfg.height = cfg.naturalHeight / cfg.computeScale;
+					if (cfg.naturalWidth === 0 || cfg.naturalHeight === 0) {
+						reject(new Error('Invalid image dimensions'));
+						return;
+					}
 
-				let canvas = this.empty(cfg);
-				canvas.ctx.drawImage(img, 0, 0, cfg.width, cfg.height);
+					cfg.computeScale = getScale(cfg.naturalWidth, cfg.naturalHeight, cfg.computeSize);
+					cfg.width = cfg.naturalWidth / cfg.computeScale;
+					cfg.height = cfg.naturalHeight / cfg.computeScale;
 
-				if (cfg.fill == "auto") { cfg.fill = getFill(canvas); }
+					let canvas = this.empty(cfg);
+					canvas.ctx.drawImage(img, 0, 0, cfg.width, cfg.height);
 
-				resolve(canvas);
+					if (cfg.fill == "auto") { cfg.fill = getFill(canvas); }
+
+					resolve(canvas);
+				} catch (error) {
+					reject(error);
+				}
 			}
+
 			img.onerror = e => {
-				console.error(e);
+				console.error('Image loading error:', e);
+				reject(new Error('Failed to load image. Please check the file format and try again.'));
 			}
 		});
 	}

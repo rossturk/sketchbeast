@@ -1,14 +1,58 @@
 import Canvas from "./canvas.js";
 import Optimizer from "./optimizer.js";
 import {Triangle, Rectangle, RotatedRectangle, Ellipse, Quadrilateral, Squiggle, Scribble, Line, BentLine} from "./shape.js";
+import WorkerPool from "./workerPool.js";
 
 class Beast {
+	constructor() {
+		this.cfg = {};
+		this._initWorkers();
+	}
+
+	_initWorkers() {
+		try {
+			// Try to initialize worker pool
+			const workerCount = navigator.hardwareConcurrency || 4;
+			this.cfg.workerPool = new WorkerPool(workerCount);
+			this.cfg.useWorkers = true;
+			console.log(`Initialized ${workerCount} Web Workers for computation`);
+		} catch (error) {
+			console.warn('Failed to initialize Web Workers, using main thread:', error);
+			this.cfg.useWorkers = false;
+		}
+
+		// Check for WebGL support
+		this._checkWebGL();
+	}
+
+	_checkWebGL() {
+		const canvas = document.createElement('canvas');
+		const gl = canvas.getContext('webgl2') || canvas.getContext('webgl');
+
+		if (gl) {
+			const debugInfo = gl.getExtension('WEBGL_debug_renderer_info');
+			const vendor = debugInfo ? gl.getParameter(debugInfo.UNMASKED_VENDOR_WEBGL) : 'Unknown';
+			const renderer = debugInfo ? gl.getParameter(debugInfo.UNMASKED_RENDERER_WEBGL) : 'Unknown';
+
+			console.log('🎮 WebGL Support: ✅ Available');
+			console.log(`   GPU Vendor: ${vendor}`);
+			console.log(`   GPU Renderer: ${renderer}`);
+			console.log(`   WebGL Version: ${gl.getParameter(gl.VERSION)}`);
+
+			this.cfg.hasWebGL = true;
+		} else {
+			console.warn('⚠️ WebGL Support: ❌ Not available');
+			this.cfg.hasWebGL = false;
+		}
+	}
+
 	configure(config) {
 		this.cfg = {...this.cfg, ...config};
 		this.cfg.shapeTypes = [];
 
 		this.cfg.minlinewidth = 1; // defaults
 		this.cfg.maxlinewidth = 2; // defaults
+		this.cfg.batchSize = config.batchSize || 5; // Progressive rendering batch size
 
 		switch (this.cfg.mode) {
 			case 0:
@@ -61,7 +105,22 @@ class Beast {
 	}
 
 	load(url) {
-		return Canvas.original(url, this.cfg);
+		return Canvas.original(url, this.cfg).catch(error => {
+			console.error('Failed to load image:', error);
+			this._showError('Failed to load image. Please try a different file.');
+			throw error;
+		});
+	}
+
+	_showError(message) {
+		if (this.cfg.nodes && this.cfg.nodes.output) {
+			const errorDiv = document.createElement('div');
+			errorDiv.className = 'alert alert-danger';
+			errorDiv.setAttribute('role', 'alert');
+			errorDiv.textContent = message;
+			this.cfg.nodes.output.innerHTML = '';
+			this.cfg.nodes.output.appendChild(errorDiv);
+		}
 	}
 
 	begin(original) {
@@ -81,7 +140,7 @@ class Beast {
 			h = this.cfg.viewHeight;
 			w = this.cfg.naturalWidth * this.cfg.viewHeight / this.cfg.naturalHeight;
 		}
-		
+
 		this.svg = Canvas.empty(this.cfg, true);
 		this.svg.setAttribute("width", w);
 		this.svg.setAttribute("height", h);
@@ -92,9 +151,13 @@ class Beast {
 		this.optimizer.onStep = (step) => {
 			if (step) {
 				this.svg.appendChild(step.toSVG());
-                this.cfg.nodes.svgsrc.value = serializer.serializeToString(this.svg);
-                this.cfg.nodes.output.innerHTML = "";
-                this.cfg.nodes.output.appendChild(this.svg);
+
+				// Only update DOM every 50 steps or on final step for extreme speed
+				if (steps % 50 === 0 || steps === this.cfg.steps - 1) {
+					this.cfg.nodes.svgsrc.value = serializer.serializeToString(this.svg);
+					this.cfg.nodes.output.innerHTML = "";
+					this.cfg.nodes.output.appendChild(this.svg);
+				}
 			}
 
 			let stepsremaining = this.cfg.steps - ++steps;
@@ -103,6 +166,13 @@ class Beast {
 			}});
 			this.cfg.nodes.output.dispatchEvent(event);
 		}
+
+		this.optimizer.onMetrics = (metrics) => {
+			// Update performance metrics in the UI
+			var event = new CustomEvent("metrics", {'detail': metrics});
+			this.cfg.nodes.output.dispatchEvent(event);
+		}
+
         this.optimizer.start();
     }
     
@@ -110,15 +180,19 @@ class Beast {
 		let currentstate = this.optimizer.state.canvas;
 		this.optimizer = new Optimizer(this.original, currentstate, this.cfg);
 		let steps = 0;
-		
+
 		let serializer = new XMLSerializer();
 
 		this.optimizer.onStep = (step) => {
 			if (step) {
 				this.svg.appendChild(step.toSVG());
-                this.cfg.nodes.svgsrc.value = serializer.serializeToString(this.svg);
-                this.cfg.nodes.output.innerHTML = "";
-                this.cfg.nodes.output.appendChild(this.svg);
+
+				// Only update DOM every 50 steps or on final step for extreme speed
+				if (steps % 50 === 0 || steps === this.cfg.steps - 1) {
+					this.cfg.nodes.svgsrc.value = serializer.serializeToString(this.svg);
+					this.cfg.nodes.output.innerHTML = "";
+					this.cfg.nodes.output.appendChild(this.svg);
+				}
 			}
 
 			let stepsremaining = this.cfg.steps - ++steps;
@@ -127,6 +201,13 @@ class Beast {
 			}});
 			this.cfg.nodes.output.dispatchEvent(event);
 		}
+
+		this.optimizer.onMetrics = (metrics) => {
+			// Update performance metrics in the UI
+			var event = new CustomEvent("metrics", {'detail': metrics});
+			this.cfg.nodes.output.dispatchEvent(event);
+		}
+
         this.optimizer.start();
     }
 }

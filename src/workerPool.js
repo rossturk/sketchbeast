@@ -1,4 +1,4 @@
-class WorkerPool {
+export default class WorkerPool {
 	constructor(count) {
 		this._freeWorkers = [];
 		this._busyWorkers = [];
@@ -26,7 +26,7 @@ class WorkerPool {
 	handleEvent(e) {
 		let index = -1;
 		this._busyWorkers.some((item, i) => {
-			if (item.worker == e.target) { 
+			if (item.worker == e.target) {
 				index = i;
 				return true;
 			} else {
@@ -50,6 +50,14 @@ class WorkerPool {
 		if (this._freeWorkers.length == 0 || this._queue.length == 0) { return; }
 		this._queue.shift()(this._freeWorkers.shift());
 	}
-}
 
-const workerPool = new WorkerPool(4);
+	terminate() {
+		// Clean up all workers
+		[...this._freeWorkers, ...this._busyWorkers.map(b => b.worker)].forEach(worker => {
+			worker.terminate();
+		});
+		this._freeWorkers = [];
+		this._busyWorkers = [];
+		this._queue = [];
+	}
+}

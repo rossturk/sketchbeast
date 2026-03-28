@@ -53,6 +53,56 @@ input[type="file"] {
     font-size: xx-large;
 }
 
+/* Mobile optimizations */
+@media (max-width: 768px) {
+    #settings {
+        margin: 15px 20px 10px 20px;
+    }
+
+    #settings p {
+        font-size: large;
+    }
+
+    .clause {
+        white-space: normal;
+        display: block;
+        margin-bottom: 10px;
+    }
+
+    #workpane {
+        flex-direction: column !important;
+    }
+
+    #workpane .col-6 {
+        width: 100% !important;
+        max-width: 100% !important;
+        flex: 0 0 100% !important;
+    }
+
+    #thumbnails {
+        height: 100px;
+    }
+
+    #thumbnails img {
+        height: 90px;
+    }
+}
+
+/* Touch-friendly buttons */
+@media (hover: none) and (pointer: coarse) {
+    #fileupload, #process {
+        padding: 10px 15px;
+        min-height: 44px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    select, input {
+        min-height: 44px;
+    }
+}
+
 #workpane {
     background-color: #efefef;
 }

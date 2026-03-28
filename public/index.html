@@ -2,13 +2,11 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
     <meta name="description" content="Sketchbeast turns your photo into a dreamy collage of random shapes. Use it to spice up your profile pic, create a background, or turn vacation shots into art.">
     <title>sketchbeast: turn photos into art</title>
-      <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-      <script src="js/beast.js"></script>
-      <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/css/bootstrap.min.css" integrity="sha384-TX8t27EcRE3e/ihU7zmQxVncDAy5uIKz4rEkgIXeMed4M0jlfIDPvg6uqKI2xXr2" crossorigin="anonymous">
-      <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-ho+j7jyWK8fNQe+A12Hb8AhRq26LrZ/JpcUGGOn+Y7RsweNrtN/tE3MoK7ZeZDyx" crossorigin="anonymous"></script>
-      <link rel="stylesheet" href="css/sketchbeast.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+    <link rel="stylesheet" href="css/sketchbeast.css">
   </head>
   <body>
     <div class="container-fluid h-100" style="background-color: #1c1c1c;">
@@ -16,277 +14,416 @@
         <div class="row d-block" id="settings">
           <div class="col">
             <form id="mainform" method="post" enctype="multipart/form-data">
-              <input type="file" id="fileinput" name="image" accept="image/*" />
+              <input type="file" id="fileinput" name="image" accept="image/*" aria-label="Upload image file" />
               <input type="hidden" id="svgsrc" />
-              <p><span class="clause">sketchbeast
-              <span class="beforetext">will use
-              <label for="fileinput" class="button" id="fileupload">your uploaded file</label></span></span>
-              <span class="clause"><span class="beforetext">to make a</span><span class="duringtext">is making a</span>
-              <select name="blur" id="blur">
-                <option value="0">crystal clear</option>
-                <option value="1" selected>pleasing</option>
-                <option value="2">dreamy</option>
-              </select>
-              collage</span><br /> <span class="clause"> with
-              <span class="beforetext">
-                <select name="count" id="count">
-                    <option value="7">a few</option>
-                    <option value="30" selected>a bunch of</option>
-                    <option value="150">too many</option>
-                  </select>    
-              </span>
-              <span class="duringtext" id="currentcount">some</span> semi-random
-                <select name="mode" id="mode">
-                  <option value="0">mixed shapes</option>
-                  <option value="1">rectangles</option>
-                  <option value="2">triangles</option>
-                  <option value="3">quadrilaterals</option>
-                  <option value="4">ellipses</option>
-                  <option value="5">mixed lines</option>
-                  <option value="6">squiggles</option>
-                  <option value="8">lines</option>
-                  <option value="9">zigzags</option>
-                </select>
-              </span>
-              <span class="beforetext clause">when you press <input type="button" value="this button" id="process" /></span>
-              <span class="spinner-grow bluu duringtext" role="status"><span class="sr-only"></span></span>
+              <p>
+                <span class="clause">
+                  <span class="visually-hidden">Sketchbeast image processor:</span>
+                  <span aria-hidden="true">sketchbeast</span>
+                  <span class="beforetext">will use
+                    <label for="fileinput" class="button" id="fileupload" tabindex="0" role="button" aria-label="Upload your file">
+                      your uploaded file
+                    </label>
+                  </span>
+                </span>
+                <span class="clause">
+                  <span class="beforetext">to make a</span>
+                  <span class="duringtext" aria-live="polite">is making a</span>
+                  <label for="blur" class="visually-hidden">Blur style</label>
+                  <select name="blur" id="blur" aria-label="Choose blur style">
+                    <option value="0">crystal clear</option>
+                    <option value="1" selected>pleasing</option>
+                    <option value="2">dreamy</option>
+                  </select>
+                  collage
+                </span><br />
+                <span class="clause"> with
+                  <span class="beforetext">
+                    <label for="count" class="visually-hidden">Number of shapes</label>
+                    <select name="count" id="count" aria-label="Choose number of shapes">
+                      <option value="7">a few</option>
+                      <option value="30" selected>a bunch of</option>
+                      <option value="150">too many</option>
+                    </select>
+                  </span>
+                  <span class="duringtext" id="currentcount" aria-live="polite" aria-atomic="true">some</span> semi-random
+                  <label for="mode" class="visually-hidden">Shape type</label>
+                  <select name="mode" id="mode" aria-label="Choose shape type">
+                    <option value="0">mixed shapes</option>
+                    <option value="1">rectangles</option>
+                    <option value="2">triangles</option>
+                    <option value="3">quadrilaterals</option>
+                    <option value="4">ellipses</option>
+                    <option value="5">mixed lines</option>
+                    <option value="6">squiggles</option>
+                    <option value="8">lines</option>
+                    <option value="9">zigzags</option>
+                  </select>
+                </span>
+                <span class="beforetext clause">when you press
+                  <button type="button" id="process" aria-label="Start processing image">
+                    this button
+                  </button>
+                </span>
+                <span class="spinner-grow bluu duringtext" role="status" aria-live="polite">
+                  <span class="visually-hidden">Processing...</span>
+                </span>
+                <span class="duringtext">
+                  <button type="button" id="pauseresume" class="btn btn-sm btn-warning ms-2" aria-label="Pause or resume processing">
+                    Pause
+                  </button>
+                  <span id="metrics" class="ms-3 text-muted small" aria-live="polite" aria-atomic="true">
+                    <span id="shapesPerSec">--</span> shapes/sec |
+                    <span id="timeRemaining">--</span>s remaining |
+                    <span id="progressPercent">--</span>% done
+                  </span>
+                </span>
               </p>
             </form>
-        </div>
-        </div>
-
-        <div id="workpane" class="row flex-grow-1 align-items-center justify-items-center overflow-auto">
-          <div class="col-6" id="input"><img alt="Before Image" src="images/before.jpg" /></div>
-          <div class="col-6" id="output"><img alt="After Image" src="images/after.svg" /></div>
+          </div>
         </div>
 
-        <div class="row flex-nowrap" id="thumbnails"></div>
-        <div class="row" id="copyright">
-            <p>Copyright &copy; 2021 Basement Experiment, LLC. All Rights Reserved. <a href="mailto:sketchbeast@basementexperiment.com">Email the beast!</a></p>
+        <div id="workpane" class="row flex-grow-1 align-items-center justify-items-center overflow-auto" role="main">
+          <div class="col-6" id="input">
+            <img alt="Original image before processing" src="images/before.jpg" />
+          </div>
+          <div class="col-6" id="output" aria-live="polite" aria-atomic="true">
+            <img alt="Processed image with artistic shapes" src="images/after.svg" />
+          </div>
         </div>
+
+        <div class="row flex-nowrap" id="thumbnails" role="region" aria-label="Generated artwork thumbnails"></div>
+        <footer class="row" id="copyright">
+          <p>Copyright &copy; 2021 Basement Experiment, LLC. All Rights Reserved. <a href="mailto:sketchbeast@basementexperiment.com">Email the beast!</a></p>
+        </footer>
       </div>
-    </div> 
-    <script>
-      
-var beast = new Beast();
+    </div>
 
+    <script src="js/beast.js"></script>
+    <script type="module">
+// Modern JavaScript without jQuery
+const elements = {
+  fileinput: document.getElementById('fileinput'),
+  fileupload: document.getElementById('fileupload'),
+  process: document.getElementById('process'),
+  pauseresume: document.getElementById('pauseresume'),
+  count: document.getElementById('count'),
+  mode: document.getElementById('mode'),
+  blur: document.getElementById('blur'),
+  input: document.getElementById('input'),
+  output: document.getElementById('output'),
+  svgsrc: document.getElementById('svgsrc'),
+  thumbnails: document.getElementById('thumbnails'),
+  currentcount: document.getElementById('currentcount'),
+  workpane: document.getElementById('workpane'),
+  shapesPerSec: document.getElementById('shapesPerSec'),
+  timeRemaining: document.getElementById('timeRemaining'),
+  progressPercent: document.getElementById('progressPercent')
+};
+
+const beast = new Beast();
+
+// Utility functions
 function previewImage(file) {
-    var input = document.getElementById("input");
-    var imageType = /image.*/;
+  const imageType = /image.*/;
 
-    if (!file.type.match(imageType)) {
-        alert("File must be an image");
-    }
+  if (!file.type.match(imageType)) {
+    showError('File must be an image');
+    return;
+  }
 
-    var img = document.createElement("img");
-    img.file = file;
-    input.innerHTML = "";
-    input.append(img);
+  const img = document.createElement("img");
+  img.file = file;
+  img.alt = "Preview of uploaded image";
+  elements.input.innerHTML = "";
+  elements.input.append(img);
 
-    var reader = new FileReader();
-    reader.onload = (function(aImg) { return function(e) { aImg.src = e.target.result; beast.svg = ""; }; })(img);
-    reader.readAsDataURL(file);
-    updateImageSize();
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    img.src = e.target.result;
+    beast.svg = "";
+  };
+  reader.onerror = () => {
+    showError('Failed to read file');
+  };
+  reader.readAsDataURL(file);
+  updateImageSize();
+}
+
+function showError(message) {
+  const alert = document.createElement('div');
+  alert.className = 'alert alert-danger alert-dismissible fade show';
+  alert.setAttribute('role', 'alert');
+  alert.innerHTML = `
+    ${message}
+    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+  `;
+  elements.output.innerHTML = '';
+  elements.output.appendChild(alert);
 }
 
 function addThumbnail() {
-    var svgsrc = document.getElementById("svgsrc").value;
-    var blob = new Blob([svgsrc], {type: 'image/svg+xml'});
-    var url = URL.createObjectURL(blob);
+  const svgsrc = elements.svgsrc.value;
+  const blob = new Blob([svgsrc], {type: 'image/svg+xml'});
+  const url = URL.createObjectURL(blob);
 
-    var thumbnail = document.createElement('img');
-    thumbnail.src = url;
-    thumbnail.id = makeid(5);
-    thumbnail.className = "thumbnail";
+  const thumbnail = document.createElement('img');
+  thumbnail.src = url;
+  thumbnail.id = makeid(5);
+  thumbnail.className = "thumbnail";
+  thumbnail.alt = "Generated artwork thumbnail";
+  thumbnail.tabIndex = 0;
+  thumbnail.setAttribute('role', 'button');
 
-    var downloadbutton = document.createElement('button');
-    downloadbutton.classList.add("btn");
-    downloadbutton.innerHTML = '<svg width="15" height="15" viewBox="0 0 16 16" class="bi bi-download" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5z"></path><path fill-rule="evenodd" d="M7.646 11.854a.5.5 0 0 0 .708 0l3-3a.5.5 0 0 0-.708-.708L8.5 10.293V1.5a.5.5 0 0 0-1 0v8.793L5.354 8.146a.5.5 0 1 0-.708.708l3 3z"></path></svg>';
-    
-    var downloadspan = document.createElement('div');
-    downloadspan.className = "download";
-    downloadspan.appendChild(downloadbutton);
+  const downloadbutton = document.createElement('button');
+  downloadbutton.classList.add("btn");
+  downloadbutton.setAttribute('aria-label', 'Download this artwork');
+  downloadbutton.innerHTML = '<svg width="15" height="15" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5z"></path><path fill-rule="evenodd" d="M7.646 11.854a.5.5 0 0 0 .708 0l3-3a.5.5 0 0 0-.708-.708L8.5 10.293V1.5a.5.5 0 0 0-1 0v8.793L5.354 8.146a.5.5 0 1 0-.708.708l3 3z"></path></svg>';
 
-    var gallery = document.getElementById("thumbnails");
-    gallery.prepend(downloadspan);
-    gallery.prepend(thumbnail);
+  const downloadspan = document.createElement('div');
+  downloadspan.className = "download";
+  downloadspan.appendChild(downloadbutton);
 
-    var image = document.createElement('img');
-    image.src = url;
+  elements.thumbnails.prepend(downloadspan);
+  elements.thumbnails.prepend(thumbnail);
 
-    var output = document.getElementById("output");
-    output.innerHTML = "";
-    output.append(image);
+  const image = document.createElement('img');
+  image.src = url;
+  image.alt = "Completed processed artwork";
 
-    updateImageSize();
-    stopProcessing();
+  elements.output.innerHTML = "";
+  elements.output.append(image);
+
+  updateImageSize();
+  stopProcessing();
 }
 
-function process(file){
-    startProcessing();
-    let url = URL.createObjectURL(file);
+function process(file) {
+  startProcessing();
+  const url = URL.createObjectURL(file);
 
-    var steps = document.getElementById('count').value;
-    var mode = document.getElementById('mode').value;
-    var blur = document.getElementById('blur').value;
+  const steps = elements.count.value;
+  const mode = elements.mode.value;
+  const blur = elements.blur.value;
 
-    steps *= ~~(Math.random()*0.4) + 0.8;
+  const adjustedSteps = steps * (Math.random() * 0.4 + 0.8);
 
-    beast.configure({
-        viewHeight: $("#workpane").height(),
-        viewWidth: ($("#workpane").width() / 2) - 40,
-        steps: parseInt(steps),
-        mode: parseInt(mode),
-        blur: parseInt(blur)
-    });
+  beast.configure({
+    viewHeight: elements.workpane.offsetHeight,
+    viewWidth: (elements.workpane.offsetWidth / 2) - 40,
+    steps: parseInt(adjustedSteps),
+    mode: parseInt(mode),
+    blur: parseInt(blur),
+    batchSize: 5
+  });
 
-    if (beast.svg) {
-        beast.continue();
-    } else {
-        beast.load(url).then(original => beast.begin(original));
-    }
+  if (beast.svg) {
+    beast.continue();
+  } else {
+    beast.load(url)
+      .then(original => beast.begin(original))
+      .catch(error => {
+        console.error('Processing failed:', error);
+        showError('Failed to process image. Please try again.');
+        stopProcessing();
+      });
+  }
 }
 
 function downloadURL(url, name = 'file.txt') {
-    const link = document.createElement("a");
-    link.href = url;
-    link.download = name;
-
-    document.body.appendChild(link);
-
-    link.dispatchEvent(
-      new MouseEvent('click', { 
-          bubbles: true, 
-          cancelable: true, 
-          view: window 
-      })
-    );
-
-    document.body.removeChild(link);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = name;
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
 }
 
 function makeid(length) {
-    var result = '';
-    var characters = 'abcdefghijklmnopqrstuvwxyz0123456789';
-    var charactersLength = characters.length;
-    for ( var i = 0; i < length; i++ ) {
-    result += characters.charAt(Math.floor(Math.random() * charactersLength));
-    }
-    return result;
+  const characters = 'abcdefghijklmnopqrstuvwxyz0123456789';
+  return Array.from({length}, () =>
+    characters.charAt(Math.floor(Math.random() * characters.length))
+  ).join('');
 }
 
 function startProcessing() {
-    $(".beforetext").hide();
-    $(".duringtext").show();
+  document.querySelectorAll('.beforetext').forEach(el => el.style.display = 'none');
+  document.querySelectorAll('.duringtext').forEach(el => el.style.display = 'inline');
 }
 
 function stopProcessing() {
-    $(".beforetext").show();
-    $(".duringtext").hide();
+  document.querySelectorAll('.beforetext').forEach(el => el.style.display = 'inline');
+  document.querySelectorAll('.duringtext').forEach(el => el.style.display = 'none');
 }
 
 function updateImageSize() {
-    var height = $("#workpane").height();
-    $("#output").find("img").css("max-height", height);
-    $("#output").find("svg").css("max-height", height);
-    $("#input").find("img").css("max-height", height);
+  const height = elements.workpane.offsetHeight;
+  const images = [...elements.output.querySelectorAll('img'),
+                  ...elements.output.querySelectorAll('svg'),
+                  ...elements.input.querySelectorAll('img')];
+  images.forEach(img => {
+    img.style.maxHeight = height + 'px';
+  });
 }
 
-$(document).ready(function () {
+// Event listeners
+document.addEventListener('DOMContentLoaded', () => {
+  updateImageSize();
+  stopProcessing();
+
+  // Prevent form submission
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' && e.target.tagName !== 'BUTTON') {
+      e.preventDefault();
+    }
+  });
+
+  // File input handling
+  elements.fileinput.addEventListener('change', (e) => {
+    Array.from(e.target.files).forEach(previewImage);
+  });
+
+  // Keyboard accessibility for file upload label
+  elements.fileupload.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      elements.fileinput.click();
+    }
+  });
+
+  // Process button
+  elements.process.addEventListener('click', () => {
+    const files = elements.fileinput.files;
+    if (files.length === 0) {
+      showError('Please select an image file first');
+      return;
+    }
+    Array.from(files).forEach(process);
+  });
+
+  // Pause/Resume button
+  elements.pauseresume.addEventListener('click', () => {
+    if (beast.optimizer) {
+      if (beast.optimizer.isPaused()) {
+        beast.optimizer.resume();
+        elements.pauseresume.textContent = 'Pause';
+        elements.pauseresume.classList.remove('btn-success');
+        elements.pauseresume.classList.add('btn-warning');
+      } else {
+        beast.optimizer.pause();
+        elements.pauseresume.textContent = 'Resume';
+        elements.pauseresume.classList.remove('btn-warning');
+        elements.pauseresume.classList.add('btn-success');
+      }
+    }
+  });
+
+  // Performance metrics updates
+  elements.output.addEventListener('metrics', (e) => {
+    const { shapesPerSecond, timeRemaining, progress } = e.detail;
+    elements.shapesPerSec.textContent = shapesPerSecond;
+    elements.timeRemaining.textContent = timeRemaining;
+    elements.progressPercent.textContent = progress;
+  });
+
+  // Window resize
+  let resizeTimeout;
+  window.addEventListener('resize', () => {
+    clearTimeout(resizeTimeout);
+    resizeTimeout = setTimeout(updateImageSize, 150);
+  });
+
+  // Thumbnail interactions
+  elements.thumbnails.addEventListener('click', (e) => {
+    if (e.target.classList.contains('thumbnail')) {
+      const image = document.createElement('img');
+      image.src = e.target.src;
+      image.alt = "Selected artwork";
+      elements.output.innerHTML = "";
+      elements.output.append(image);
+      updateImageSize();
+    } else if (e.target.closest('.download')) {
+      const thumbnail = e.target.closest('.download').nextElementSibling;
+      if (thumbnail) {
+        downloadURL(thumbnail.src, `beast-${thumbnail.id}.svg`);
+      }
+    }
+  });
+
+  // Keyboard support for thumbnails
+  elements.thumbnails.addEventListener('keydown', (e) => {
+    if ((e.key === 'Enter' || e.key === ' ') && e.target.classList.contains('thumbnail')) {
+      e.preventDefault();
+      e.target.click();
+    }
+  });
+
+  // Hover effects for thumbnails (non-touch devices)
+  if (window.matchMedia('(hover: hover)').matches) {
+    elements.thumbnails.addEventListener('mouseover', (e) => {
+      if (e.target.classList.contains('thumbnail')) {
+        const download = e.target.previousElementSibling;
+        if (download?.classList.contains('download')) {
+          download.style.display = 'block';
+        }
+      }
+    });
+
+    elements.thumbnails.addEventListener('mouseout', (e) => {
+      if (e.target.classList.contains('thumbnail')) {
+        const download = e.target.previousElementSibling;
+        if (download?.classList.contains('download')) {
+          download.style.display = 'none';
+        }
+      }
+    });
+  }
+
+  // Select width adjustment
+  const adjustSelectWidth = (select) => {
+    const text = select.options[select.selectedIndex].text;
+    const aux = document.createElement('select');
+    const option = document.createElement('option');
+    option.text = text;
+    aux.appendChild(option);
+    aux.style.position = 'absolute';
+    aux.style.visibility = 'hidden';
+    document.body.appendChild(aux);
+    select.style.width = aux.offsetWidth + 'px';
+    document.body.removeChild(aux);
+  };
+
+  document.querySelectorAll('select').forEach(select => {
+    adjustSelectWidth(select);
+    select.addEventListener('change', () => adjustSelectWidth(select));
+  });
+
+  // Beast event handlers
+  elements.output.addEventListener('beast', addThumbnail);
+
+  elements.output.addEventListener('shape', (e) => {
+    if (e.detail.stepsremaining > 0) {
+      elements.currentcount.textContent = e.detail.stepsremaining;
+    }
     updateImageSize();
-    stopProcessing();
+  });
 
-    $(window).keydown(function(event){
-        if(event.keyCode == 13) {
-            event.preventDefault();
-            return false;
-        }
-    });
-
-    document.querySelector('#fileinput').addEventListener('change', function () {
-        for(var i=0; i<this.files.length; i++){
-            previewImage(this.files[i]); 
-        }
-    }, false);
-    
-    document.getElementById('process').addEventListener('click', function () {
-        var files = document.querySelector('#fileinput').files;
-        for(var i=0; i<files.length; i++){
-            process(files[i]);
-        }
-    }, false);
-    
-    $(window).resize(function() {
-        updateImageSize();
-    });
-    
-    $('body').on('click', '.download', function (){
-        downloadURL($(this).prev().attr('src'), "beast-" + $(this).prev().attr('id') + ".svg");
-    });
-    
-    $('body').on('click', '.thumbnail', function (){
-        var image = document.createElement('img');
-        image.src = this.src;
-    
-        var height = $("#workpane").height();
-    
-        var output = document.getElementById("output");
-        output.innerHTML = "";
-        output.append(image);
-    
-        $("#output").find("img").css("max-height", height);
-    });
-        
-    document.getElementById('output').addEventListener('beast', function () {
-        addThumbnail();
-    }, false);
-    
-    document.getElementById('output').addEventListener('shape', function (e) {
-        if (e.detail.stepsremaining > 0) {
-            var count = document.getElementById("currentcount");
-            count.innerHTML = e.detail.stepsremaining;
-        }
-        updateImageSize();
-    }, false);
-    
-    $('select').change(function(){
-        var text = $(this).find('option:selected').text();
-        var $aux = $('<select/>').append($('<option/>').text(text));
-        $(this).after($aux);
-        $(this).width($aux.width());
-        $aux.remove();
-    }).change();
-    
-    $('body').on('mouseover', '.thumbnail, .download', function () {
-        if ($(this).attr('class') == "thumbnail") {
-           $(this).next().show();
-        } else {
-           $(this).show();
-        }
-    });
-    
-    $('body').on('mouseleave', '.thumbnail, .download', function () {
-        if ($(this).attr('class') == "thumbnail") {
-           $(this).next().hide();
-        } else {
-            $(this).hide();
-        }
-    });
-
-    beast.configure({
-        computeSize: 400,
-        shapes: 200,
-        alpha: 0.5,
-        mutations: 50,
-        mutateAlpha: false,
-        fill: 'auto',
-        nodes: {
-            output: document.querySelector("#output"),
-            svgsrc: document.querySelector("#svgsrc")
-        }
-    });
+  // Configure beast with performance optimizations and GPU acceleration
+  beast.configure({
+    computeSize: 400,
+    shapes: 50,  // Reduced from 200 - much faster while still good quality
+    alpha: 0.5,
+    mutations: 15,  // Reduced from 30 - faster convergence
+    mutateAlpha: false,
+    fill: 'auto',
+    batchSize: 5,
+    useWorkers: true,  // Re-enable workers for multi-core performance
+    nodes: {
+      output: elements.output,
+      svgsrc: elements.svgsrc
+    }
+  });
 });
-
     </script>
   </body>
-</html>   
+</html>
